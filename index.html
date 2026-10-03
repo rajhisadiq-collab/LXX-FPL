@@ -132,6 +132,7 @@ details.dir{background:var(--paper);border:1px solid var(--line);border-radius:6
 .seg2 button:disabled{opacity:.5}.seg2 small{font-size:11px;font-weight:400}
 .calc{font-family:'IBM Plex Mono',monospace;font-size:18px;font-weight:600;padding:8px 10px;border:1px dashed var(--line);border-radius:4px;direction:ltr;text-align:left;background:color-mix(in srgb,var(--strip) 15%,var(--paper))}
 .tg{display:flex;flex-wrap:wrap;gap:6px}
+.mvsig,#m_sig{text-transform:none}
 .tgb{font-size:14px;padding:8px 12px}.tgb[aria-pressed=true]{background:var(--strip);color:var(--stripInk);border-color:var(--strip)}
 .sub{font-size:14px;margin:0;padding:6px 14px 0;color:var(--muted);font-weight:600}.sub small{font-weight:400;font-family:'IBM Plex Mono',monospace}
 .grid.g4{grid-template-columns:repeat(auto-fill,minmax(110px,1fr))}
@@ -349,7 +350,7 @@ pre.out{margin:0;padding:14px;font-family:'IBM Plex Mono',monospace;font-size:13
       <div class="grid">
         <div><label>رقم الرحلة</label><input id="m_flt" value="LXX5000" maxlength="8"></div>
         <div><label>التاريخ</label><input id="m_date" type="date"></div>
-        <div><label>تسجيل الطائرة</label><input id="m_reg" value="URCQX" maxlength="7" list="m_regs"><datalist id="m_regs"></datalist></div>
+        <div><label>تسجيل الطائرة</label><input id="m_reg" placeholder="5AWAC أو 5A-WAC" value="URCQX" maxlength="7" list="m_regs"><datalist id="m_regs"></datalist></div>
       </div>
     </section>
 
@@ -524,7 +525,7 @@ const XDEF={radio:['U'],surv:['P','D','J'],jack:['U','V']};
 let xst=store.get('fpl_x')||XDEF;
 function grp(g){const o={any:false,s:''};document.querySelectorAll('.xb[data-g="'+g+'"]').forEach(b=>{const v=b.dataset.v;if(!(xst[g]||[]).includes(v)){o[v]=1;o.any=true;o.s+=v}});return o}
 function syncX(){document.querySelectorAll('.xb').forEach(b=>b.setAttribute('aria-pressed',(xst[b.dataset.g]||[]).includes(b.dataset.v)?'true':'false'))}
-function vals(){const o={};F.forEach(k=>o[k]=k==='dof'?$(k).value:U($(k).value));o.rules=(o.rules||'')[0]||'';o.addr=(typeof finalAddrs==='function'?finalAddrs(o):[]).map(x=>x.a).join(' ');o.tof=tof;o.radio=grp('radio');o.surv=grp('surv');o.jack=grp('jack');return o}
+function vals(){const o={};F.forEach(k=>o[k]=k==='dof'?$(k).value:U($(k).value));o.rules=(o.rules||'')[0]||'';o.reg=(o.reg||'').replace(/[^A-Z0-9]/g,'');o.addr=(typeof finalAddrs==='function'?finalAddrs(o):[]).map(x=>x.a).join(' ');o.tof=tof;o.radio=grp('radio');o.surv=grp('surv');o.jack=grp('jack');return o}
 function hhmm(s){return /^([01]\d|2[0-3])[0-5]\d$/.test(s)}
 function dur(s){return /^\d{2}[0-5]\d$/.test(s)}
 function addMin(a,b){const m=(+a.slice(0,2)*60+ +a.slice(2))+(+b.slice(0,2)*60+ +b.slice(2));const dd=Math.floor(m/1440);const r=m%1440;return pad(Math.floor(r/60),2)+pad(r%60,2)+'Z'+(dd?' (+'+dd+')':'')}
@@ -820,8 +821,8 @@ function renderHolds(){const box=$('m_holdIn');box.innerHTML='';holdList().forEa
 $('m_holds').addEventListener('input',()=>{renderHolds();run()});
 
 // aircraft library
-$('m_reg').addEventListener('change',()=>{const a=acs()[U($('m_reg').value)];if(!a)return;$('m_cfgc').value=a.c;$('m_cfgy').value=a.y;$('m_crf').value=a.f;$('m_crc').value=a.cc;$('m_holds').value=a.h;renderHolds();run();toast('تم تحميل بيانات '+U($('m_reg').value))});
-$('m_saveAc').onclick=()=>{const r=U($('m_reg').value);if(!/^[A-Z0-9]{3,7}$/.test(r)){toast('اكتب تسجيل الطائرة أولاً');return}
+$('m_reg').addEventListener('change',()=>{const a=acs()[U($('m_reg').value).replace(/[^A-Z0-9]/g,'')];if(!a)return;$('m_cfgc').value=a.c;$('m_cfgy').value=a.y;$('m_crf').value=a.f;$('m_crc').value=a.cc;$('m_holds').value=a.h;renderHolds();run();toast('تم تحميل بيانات '+U($('m_reg').value))});
+$('m_saveAc').onclick=()=>{const r=U($('m_reg').value).replace(/[^A-Z0-9]/g,'');if(!/^[A-Z0-9]{3,7}$/.test(r)){toast('اكتب تسجيل الطائرة أولاً');return}
   const all=acs();all[r]={c:$('m_cfgc').value,y:$('m_cfgy').value,f:$('m_crf').value,cc:$('m_crc').value,h:$('m_holds').value};store.set('mvt_ac',all);fillRegs();toast('تم حفظ الطائرة '+r)};
 
 // PSM editor
@@ -847,7 +848,7 @@ function eaCalc(dateStr,abn,ft,offb){const d=new Date(dateStr+'T00:00:00Z');cons
   const same=t.getUTCDate()===d.getUTCDate();const hm=p2(t.getUTCHours())+p2(t.getUTCMinutes());return{txt:(same?'':p2(t.getUTCDate()))+hm,same,hm,day:t.getUTCDate()}}
 
 function build2(){
-  const v={};MF.forEach(k=>v[k]=k==='m_date'||k==='m_sig'||k==='m_si'||k==='a_si'?$(k).value:U($(k).value));
+  const v={};MF.forEach(k=>v[k]=k==='m_date'||k==='m_sig'||k==='m_si'||k==='a_si'?$(k).value:U($(k).value));v.m_reg=v.m_reg.replace(/[^A-Z0-9]/g,'');
   const eM=[],eL=[],wM=[],wL=[];
   if(!/^[A-Z0-9]{2}[A-Z]?\d{1,5}$/.test(v.m_flt))eM.push('رقم الرحلة غير صحيح');
   if(!v.m_date)eM.push('اختر التاريخ');
