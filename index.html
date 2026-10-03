@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>خطة الطيران — ATR</title>
+<title>العمليات — الليبية السريعة</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -124,11 +124,110 @@ details.dir{background:var(--paper);border:1px solid var(--line);border-radius:6
 .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(84px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--paper);padding:9px 16px;border-radius:4px;font-size:14px;opacity:0;pointer-events:none;transition:opacity .2s}
 .toast.on{opacity:1}
 @media (prefers-reduced-motion: reduce){.toast{transition:none}}
+.nav button,.seg2 button{font-family:'IBM Plex Mono',monospace;font-size:17px;padding:10px}
+.nav button[aria-selected=true]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.seg2{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:14px}
+.seg2 button{font-family:'IBM Plex Sans Arabic',sans-serif}
+.seg2 button[aria-selected=true]{background:var(--strip);color:var(--stripInk);border-color:var(--strip)}
+.seg2 button:disabled{opacity:.5}.seg2 small{font-size:11px;font-weight:400}
+.calc{font-family:'IBM Plex Mono',monospace;font-size:18px;font-weight:600;padding:8px 10px;border:1px dashed var(--line);border-radius:4px;direction:ltr;text-align:left;background:color-mix(in srgb,var(--strip) 15%,var(--paper))}
+.tg{display:flex;flex-wrap:wrap;gap:6px}
+.tgb{font-size:14px;padding:8px 12px}.tgb[aria-pressed=true]{background:var(--strip);color:var(--stripInk);border-color:var(--strip)}
+.sub{font-size:14px;margin:0;padding:6px 14px 0;color:var(--muted);font-weight:600}.sub small{font-weight:400;font-family:'IBM Plex Mono',monospace}
+.grid.g4{grid-template-columns:repeat(auto-fill,minmax(110px,1fr))}
+.pax{display:grid;grid-template-columns:1fr 70px;gap:6px;padding:10px 14px;border-bottom:1px solid var(--line)}
+.pax .opts{grid-column:1/-1;display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.pax .opts button{font-family:'IBM Plex Mono',monospace;font-size:13px;padding:6px 9px}
+.pax .opts button[aria-pressed=true]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.pax .opts .rm{margin-inline-start:auto;color:var(--err)}
+pre.out{margin:0;padding:14px;font-family:'IBM Plex Mono',monospace;font-size:13.5px;white-space:pre;overflow-x:auto;direction:ltr;text-align:left;background:var(--field)}
+.ob{padding:10px 14px}.ob button{flex:1}
+.errs.warn{color:#9A5E00}
+.seg4{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:14px}
+.seg4 button{display:flex;flex-direction:column;align-items:center;padding:8px 2px;font-size:13px;line-height:1.3}
+.seg4 button small{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--muted)}
+.seg4 button[aria-selected=true]{background:var(--ink);color:var(--paper);border-color:var(--ink)}.seg4 button[aria-selected=true] small{color:var(--paper)}
+.tgb[aria-pressed=true]{background:var(--strip)}
+[data-hide]{display:none!important}
+
+[hidden]{display:none!important}
+/* ===== home ===== */
+.hero{background:#16233B;color:#fff;border-radius:10px;padding:18px 18px 16px;margin-bottom:14px;position:relative;overflow:hidden}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .hero{background:#0A1222;border:1px solid var(--line)}}
+:root[data-theme="dark"] .hero{background:#0A1222;border:1px solid var(--line)}
+.hrow{display:flex;justify-content:space-between;align-items:baseline;direction:ltr}
+.brand{font-family:'IBM Plex Mono',monospace;font-weight:600;letter-spacing:.14em;font-size:13px;opacity:.85}
+.ops{font-family:'IBM Plex Mono',monospace;font-size:12px;color:#16233B;background:#F2B33D;padding:2px 7px;border-radius:3px;font-weight:600}
+.arc{display:block;width:100%;height:auto;margin:10px 0 2px;color:#fff}
+.clock{direction:ltr;text-align:left;font-family:'IBM Plex Mono',monospace;line-height:1;display:flex;align-items:baseline;gap:4px}
+.clock b{font-size:54px;font-weight:600;letter-spacing:-.02em}
+.clock span{font-size:18px;opacity:.55;min-width:2.2ch}
+.clock i{font-style:normal;font-size:22px;color:#F2B33D;font-weight:600}
+.zdate{direction:ltr;text-align:left;font-family:'IBM Plex Mono',monospace;font-size:13px;opacity:.7;margin-top:6px;letter-spacing:.06em}
+.cards{display:grid;gap:12px}
+.card{display:grid;grid-template-columns:1fr auto;grid-template-areas:"code chev" "ttl chev" "last chev";text-align:right;background:var(--paper);border:1px solid var(--line);border-inline-start:6px solid var(--strip);border-radius:10px;padding:16px 18px;gap:2px 10px;cursor:pointer;transition:transform .12s ease,box-shadow .12s ease}
+.card:active{transform:scale(.985)}
+.card:focus-visible{outline:2px solid var(--strip);outline-offset:2px}
+.card .code{grid-area:code;font-family:'IBM Plex Mono',monospace;font-size:30px;font-weight:600;letter-spacing:.04em;direction:ltr;text-align:right}
+.card .ttl{grid-area:ttl;font-size:15px;font-weight:600}
+.card .last{grid-area:last;font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--muted);margin-top:6px}
+.card .chev{grid-area:chev;align-self:center;font-size:26px;color:var(--muted);line-height:1}
+.card+.card{border-inline-start-color:var(--ink)}
+.topbar{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:10px;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);margin:-16px -14px 14px;padding:10px 14px;border-bottom:1px solid var(--line)}
+.topbar .back{padding:7px 12px;font-size:14px}
+.topbar b{font-family:'IBM Plex Mono',monospace;font-size:18px;text-align:center}
+.tclock{font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--muted);direction:ltr}
+.toast{display:flex;align-items:center;gap:8px}
+.toast .tick{width:18px;height:18px;flex:none}
+.toast .tick path{fill:none;stroke:#6FD3A0;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:24;stroke-dashoffset:24}
+.toast.on .tick path{animation:draw .35s .05s ease-out forwards}
+@keyframes draw{to{stroke-dashoffset:0}}
+@keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+@keyframes inFwd{from{opacity:0;transform:translateX(-26px)}to{opacity:1;transform:none}}
+@keyframes inBack{from{opacity:0;transform:translateX(26px)}to{opacity:1;transform:none}}
+@keyframes inFade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.rise{animation:rise .45s cubic-bezier(.2,.7,.2,1) both}
+.in-fwd{animation:inFwd .28s cubic-bezier(.2,.7,.2,1)}
+.in-back{animation:inBack .28s cubic-bezier(.2,.7,.2,1)}
+.in-fade{animation:inFade .2s ease-out}
+@media (prefers-reduced-motion: reduce){.rise,.in-fwd,.in-back,.in-fade{animation:none}.card{transition:none}}
 </style>
 </head>
 <body>
 <div class="wrap">
-  <h1>خطة طيران ICAO — طائرات ATR، الليبية السريعة</h1>
+  <div id="viewHome" class="view">
+    <header class="hero">
+      <div class="hrow"><span class="brand">LIBYAN EXPRESS</span><span class="ops">OPS</span></div>
+      <svg class="arc" viewBox="0 0 320 70" aria-hidden="true">
+        <path id="arcPath" d="M8 62 Q160 -18 312 62" fill="none" stroke="currentColor" stroke-width="1.4" stroke-dasharray="3 5" opacity=".45"/>
+        <circle cx="8" cy="62" r="3.2" fill="#F2B33D"/><circle cx="312" cy="62" r="3.2" fill="#F2B33D"/>
+        <g id="plane" transform="translate(8 62)"><g transform="rotate(90) scale(.62) translate(-12 -12)"><path fill="#F2B33D" d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"/></g>
+          <animateMotion id="planeAnim" dur="1.6s" begin="indefinite" fill="freeze" rotate="auto" keyPoints="0;1" keyTimes="0;1" calcMode="spline" keySplines=".45 0 .2 1"><mpath href="#arcPath"/></animateMotion></g>
+      </svg>
+      <div class="clock"><b id="zClock">--:--</b><span id="zSec">00</span><i>Z</i></div>
+      <div class="zdate" id="zDate"></div>
+    </header>
+    <div class="cards">
+      <button type="button" class="card" data-go="fpl">
+        <span class="code">FPL</span>
+        <span class="ttl">خطة طيران ICAO</span>
+        <span class="last" id="hFpl">—</span>
+        <span class="chev" aria-hidden="true">←</span>
+      </button>
+      <button type="button" class="card" data-go="mvt">
+        <span class="code">MVT</span>
+        <span class="ttl">مغادرة · وصول · تحويل · عودة</span>
+        <span class="last" id="hMvt">—</span>
+        <span class="chev" aria-hidden="true">←</span>
+      </button>
+    </div>
+  </div>
+  <div class="topbar" id="topbar" hidden>
+    <button type="button" class="back" id="backBtn" aria-label="الرجوع للرئيسية">→ الرئيسية</button>
+    <b id="tbTitle">FPL</b>
+    <span class="tclock" id="tClock">--:--Z</span>
+  </div>
+  <div id="viewFPL" class="view" hidden>
   <div class="strip" aria-live="polite">
     <div class="cs" id="sCs">LXX340</div>
     <div class="rt"><b id="sRt">HLLM → HLLS</b><span id="sReg">5AATR · AT45</span></div>
@@ -243,9 +342,157 @@ details.dir{background:var(--paper);border:1px solid var(--line);border-radius:6
     <div class="row" style="padding:0 14px 12px"><button type="button" id="copyBtn">نسخ النص</button><button type="button" id="waTxtBtn">إرسال النص فقط على واتساب</button></div>
     <ul class="errs" id="errs"></ul>
   </section>
+  </div>
+  <div id="viewMVT" class="view" hidden>
+    <section>
+      <h2>بيانات الرحلة <small>مشتركة</small></h2>
+      <div class="grid">
+        <div><label>رقم الرحلة</label><input id="m_flt" value="LXX5000" maxlength="8"></div>
+        <div><label>التاريخ</label><input id="m_date" type="date"></div>
+        <div><label>تسجيل الطائرة</label><input id="m_reg" value="URCQX" maxlength="7" list="m_regs"><datalist id="m_regs"></datalist></div>
+      </div>
+    </section>
+
+    <div class="seg2" id="mvtMode" role="tablist" aria-label="نوع الحركة">
+      <button type="button" role="tab" aria-selected="true" data-m="dep">مغادرة</button>
+      <button type="button" role="tab" aria-selected="false" data-m="arr">وصول</button>
+    </div>
+
+    <div id="depPane">
+    <section>
+      <h2>MVT مغادرة <small>الأوقات بتوقيت Zulu</small></h2>
+      <div class="grid">
+        <div><label>محطة المغادرة (IATA)</label><input id="m_dep" value="MJI" maxlength="3"></div>
+        <div><label>محطة الوصول (IATA)</label><input id="m_dest" value="JED" maxlength="3"></div>
+        <div><label>Off-block</label><input id="m_offb" value="0520" maxlength="4" inputmode="numeric"><div class="hint">HHMM</div></div>
+        <div><label>الإقلاع (Airborne)</label><input id="m_abn" value="0532" maxlength="4" inputmode="numeric"><div class="hint">HHMM</div></div>
+        <div><label>مدة الطيران</label><input id="m_ft" value="0355" maxlength="4" inputmode="numeric"><div class="hint">HHMM</div></div>
+        <div><label>الوصول المتوقع EA</label><div class="calc" id="m_ea">—</div><div class="hint">يُحسب تلقائياً</div></div>
+        <div><label>PX مجموع الركاب</label><input id="m_px" inputmode="numeric" maxlength="3"><div class="hint" id="m_pxh">فارغ = من LDM</div></div>
+      </div>
+      <div class="grid" style="padding-top:0">
+        <div class="full"><label>SI طلبات</label>
+          <div class="tg">
+            <button type="button" class="tgb" id="m_gpu" aria-pressed="true">GPU عند الوصول</button>
+            <button type="button" class="tgb" id="m_asu" aria-pressed="true">ASU للمغادرة</button>
+            <button type="button" class="tgb" id="m_wch" aria-pressed="true">WCH من PSM</button>
+          </div></div>
+        <div class="full"><label>SI إضافي (اختياري، كل سطر SI منفصل)</label><textarea id="m_si" rows="2" placeholder="مثال: 2 DEPORTEES ON BOARD"></textarea></div>
+      </div>
+    </section>
+
+    <section>
+      <h2>LDM <small>الحمولة</small></h2>
+      <div class="grid">
+        <div><label>توزيع C</label><input id="m_cfgc" value="8" inputmode="numeric" maxlength="3"></div>
+        <div><label>توزيع Y</label><input id="m_cfgy" value="150" inputmode="numeric" maxlength="3"></div>
+        <div><label>طاقم القيادة</label><input id="m_crf" value="3" inputmode="numeric" maxlength="2"></div>
+        <div><label>طاقم الضيافة</label><input id="m_crc" value="5" inputmode="numeric" maxlength="2"></div>
+        <div class="full"><button type="button" id="m_saveAc">حفظ الطائرة (التسجيل + التوزيع + الطاقم + العنابر)</button></div>
+      </div>
+      <h3 class="sub">الركاب</h3>
+      <div class="grid g4">
+        <div><label>رجال</label><input id="m_ma" value="78" inputmode="numeric" maxlength="3"></div>
+        <div><label>نساء</label><input id="m_fe" value="58" inputmode="numeric" maxlength="3"></div>
+        <div><label>أطفال</label><input id="m_ch" value="15" inputmode="numeric" maxlength="3"></div>
+        <div><label>رضّع</label><input id="m_in" value="0" inputmode="numeric" maxlength="3"></div>
+        <div><label>درجة C</label><input id="m_pc" value="8" inputmode="numeric" maxlength="3"></div>
+        <div><label>درجة Y</label><input id="m_py" value="143" inputmode="numeric" maxlength="3"></div>
+        <div><label>PAD C</label><input id="m_padc" value="0" inputmode="numeric" maxlength="2"></div>
+        <div><label>PAD Y</label><input id="m_pady" value="0" inputmode="numeric" maxlength="3"></div>
+      </div>
+      <h3 class="sub">العنابر (كغ) <small id="m_tt"></small></h3>
+      <div class="grid">
+        <div class="full"><label>أرقام العنابر في هذه الطائرة</label><input id="m_holds" value="1,3,5"><div class="hint">مفصولة بفواصل. الفارغ يُكتب NIL</div></div>
+      </div>
+      <div class="grid g4" id="m_holdIn"></div>
+      <h3 class="sub">نوع الحمولة (كغ)</h3>
+      <div class="grid g4">
+        <div><label>B أمتعة</label><input id="m_b" value="2685" inputmode="numeric" maxlength="5"></div>
+        <div><label>C بضائع</label><input id="m_c" inputmode="numeric" maxlength="5" placeholder="NIL"></div>
+        <div><label>E معدات</label><input id="m_e" inputmode="numeric" maxlength="5" placeholder="NIL"></div>
+        <div><label>M بريد</label><input id="m_m" inputmode="numeric" maxlength="5" placeholder="NIL"></div>
+        <div><label>عدد الحقائب</label><input id="m_bags" value="157" inputmode="numeric" maxlength="4"></div>
+        <div><label>لاحقة الحقائب</label><input id="m_bsuf" value="YC" maxlength="6"></div>
+      </div>
+    </section>
+
+    <section>
+      <h2>PSM <small>ركاب الخدمات الخاصة</small></h2>
+      <div id="m_psm"></div>
+      <div class="arow"><button type="button" id="m_addPax">+ إضافة راكب</button></div>
+      <div class="hint" style="padding:0 14px 12px">WCHS: لا يصعد الدرج · WCHR: للمسافات الطويلة · WCHC: محمول بالكامل · WCMP: كرسي يدوي خاص بالراكب</div>
+    </section>
+
+    </div>
+
+    <div id="arrPane" hidden>
+      <div class="seg4" id="arrType" role="tablist" aria-label="نوع رسالة الوصول">
+        <button type="button" role="tab" data-t="AA" aria-selected="true">وصول<small>AA</small></button>
+        <button type="button" role="tab" data-t="DR" aria-selected="false">تحويل<small>DR</small></button>
+        <button type="button" role="tab" data-t="RR" aria-selected="false">عودة للموقف<small>RR</small></button>
+        <button type="button" role="tab" data-t="FR" aria-selected="false">عودة بعد الإقلاع<small>FR</small></button>
+      </div>
+      <section>
+        <h2 id="a_title">MVT وصول <small>الأوقات بتوقيت Zulu</small></h2>
+        <div class="grid">
+          <div><label id="a_staL">محطة الوصول (IATA)</label><input id="a_sta" value="TUN" maxlength="3"></div>
+          <div class="t-AA"><label>الهبوط (Touchdown)</label><input id="a_td" value="1100" maxlength="4" inputmode="numeric"><div class="hint">HHMM</div></div>
+          <div class="t-AA"><label>On-block</label><input id="a_ob" value="1105" maxlength="4" inputmode="numeric"><div class="hint">HHMM</div></div>
+          <div class="t-DR"><label>الوجهة الأصلية (IATA)</label><input id="a_orig" value="TUN" maxlength="3"></div>
+          <div class="t-DR"><label>مطار التحويل (IATA)</label><input id="a_dra" value="SFA" maxlength="3"></div>
+          <div class="t-DR"><label>وقت قرار التحويل</label><input id="a_drt" value="1040" maxlength="4" inputmode="numeric"><div class="hint">HHMM</div></div>
+          <div class="t-DR"><label>مدة الطيران المتبقية</label><input id="a_drft" value="0035" maxlength="4" inputmode="numeric"><div class="hint">HHMM</div></div>
+          <div class="t-DR"><label>EA إلى مطار التحويل</label><div class="calc" id="a_ea">—</div><div class="hint">يُحسب تلقائياً</div></div>
+          <div class="t-RR"><label>Off-block</label><input id="a_rrob" value="0900" maxlength="4" inputmode="numeric"><div class="hint">HHMM</div></div>
+          <div class="t-RR"><label>وقت الرجوع للموقف</label><input id="a_rrt" value="0915" maxlength="4" inputmode="numeric"><div class="hint">HHMM</div></div>
+          <div class="t-FR"><label>الهبوط</label><input id="a_frl" value="1005" maxlength="4" inputmode="numeric"><div class="hint">HHMM</div></div>
+          <div class="t-FR"><label>On-block</label><input id="a_frb" value="1010" maxlength="4" inputmode="numeric"><div class="hint">HHMM</div></div>
+        </div>
+        <div class="grid t-DR t-RR t-FR" style="padding-top:0">
+          <div class="full"><label>السبب</label><div class="tg" id="a_rsn">
+            <button type="button" class="tgb" data-r="WX">WX طقس</button><button type="button" class="tgb" data-r="TECH">TECH فني</button>
+            <button type="button" class="tgb" data-r="MEDICAL">MEDICAL طبي</button><button type="button" class="tgb" data-r="ATC">ATC</button></div></div>
+        </div>
+        <div class="grid" style="padding-top:0">
+          <div class="full"><label>SI إضافي (اختياري، كل سطر SI منفصل)</label><textarea id="a_si" rows="2"></textarea></div>
+        </div>
+      </section>
+    </div>
+
+    <section>
+      <h2>التوقيع</h2>
+      <div class="grid"><div class="full"><textarea id="m_sig" rows="2">kind Regards,
+MJI FLIGHT WATCH</textarea></div></div>
+    </section>
+
+    <section id="arrOut" hidden>
+      <h2>رسالة MVT</h2>
+      <pre class="out" id="o_arr"></pre>
+      <ul class="errs" id="e_arr"></ul>
+      <div class="row ob"><button type="button" class="primary" data-cp="arr">نسخ MVT</button><button type="button" class="wa" data-wa="arr">واتساب MVT</button></div>
+    </section>
+
+    <div id="depOut">
+    <section>
+      <h2>رسالة MVT</h2>
+      <pre class="out" id="o_mvt"></pre>
+      <ul class="errs" id="e_mvt"></ul>
+      <div class="row ob"><button type="button" class="primary" data-cp="mvt">نسخ MVT</button><button type="button" class="wa" data-wa="mvt">واتساب MVT</button></div>
+    </section>
+
+    <section>
+      <h2>رسالة LDM + PSM</h2>
+      <pre class="out" id="o_ldm"></pre>
+      <ul class="errs" id="e_ldm"></ul>
+      <div class="row ob"><button type="button" class="primary" data-cp="ldm">نسخ LDM+PSM</button><button type="button" class="wa" data-wa="ldm">واتساب LDM+PSM</button></div>
+    </section>
+    <div class="row ob"><button type="button" data-cp="all">نسخ الكل (MVT + LDM + PSM)</button></div>
+    </div>
+  </div>
 </div>
 
-<div class="bar"><div class="in">
+<div class="bar" id="fplBar" hidden><div class="in">
   <button class="primary" id="pdfBtn">حفظ PDF</button>
   <button class="wa" id="waBtn">مشاركة واتساب</button>
 </div></div>
@@ -259,7 +506,7 @@ details.dir{background:var(--paper);border:1px solid var(--line);border-radius:6
 const $=id=>document.getElementById(id);
 const F=['acid','dof','dep','eobt','dest','eet','altn','altn2','spd','lvl','route','endur','pob','other','remarks','pic','dname','lic','reg','type','wtc','rules','equip','colour','orig'];
 const store={get(k){try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
-function toast(t){const e=$('toast');e.textContent=t;e.classList.add('on');clearTimeout(e._t);e._t=setTimeout(()=>e.classList.remove('on'),2200)}
+function toast(t){const e=$('toast');const ok=/^تم(?! الإلغاء)/.test(t);e.innerHTML='';if(ok){e.insertAdjacentHTML('beforeend','<svg class="tick" viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10.5l4 4 8-9"/></svg>')}e.appendChild(document.createTextNode(t));e.classList.toggle('ok',ok);e.classList.add('on');clearTimeout(e._t);e._t=setTimeout(()=>e.classList.remove('on'),2200)}
 const U=v=>(v||'').toUpperCase().replace(/\s+/g,' ').trim();
 const pad=(n,l)=>String(n).padStart(l,'0');
 
@@ -541,6 +788,219 @@ $('waBtn').onclick=async()=>{const f=await preparePdf();if(!f)return;
 $('waTxtBtn').onclick=()=>{const b=build();if(b.errs.length){toast('صحّح الأخطاء أولاً');return}const t='FF '+b.v.addr+'\n'+b.msg+'\nPIC: '+b.v.pic+(b.v.dname?'\nFD/ '+b.v.dname:'')+(b.v.lic?'\nLIC No./ '+b.v.lic:'');window.open('https://wa.me/?text='+encodeURIComponent(t),'_blank')};
 $('copyBtn').onclick=async()=>{const b=build();try{await navigator.clipboard.writeText('FF '+b.v.addr+'\n'+b.msg);toast('تم النسخ')}catch(e){toast('النسخ غير متاح، انسخ من المربع يدوياً')}};
 refresh();
+// ===== MVT module =====
+(function(){
+const MF=['a_sta','a_td','a_ob','a_orig','a_dra','a_drt','a_drft','a_rrob','a_rrt','a_frl','a_frb','a_si','m_flt','m_date','m_reg','m_dep','m_dest','m_offb','m_abn','m_ft','m_px','m_si','m_cfgc','m_cfgy','m_crf','m_crc','m_ma','m_fe','m_ch','m_in','m_pc','m_py','m_padc','m_pady','m_holds','m_b','m_c','m_e','m_m','m_bags','m_bsuf','m_sig'];
+const MON=['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+const N=v=>{const t=String(v||'').trim();return t===''?null:(/^\d+$/.test(t)?+t:NaN)};
+const p2=n=>String(n).padStart(2,'0');
+const tog={gpu:true,asu:true,wch:true};let mode='dep',atype='AA',rsn={DR:'WX',RR:'TECH',FR:'TECH'},staT={AA:'TUN',DR:'MJI',RR:'MJI',FR:'MJI'};
+let holdVals=store.get('mvt_holds')||{"1":"805","3":"1880","5":""};
+let pax=store.get('mvt_psm')||[
+ {n:'ALSHAREEF/LATEEFAH',s:'21F',t:'WCHS',w:1,c:'Y'},{n:'ELMAJDUB/KHADIJAMR',s:'26S',t:'WCHS',w:1,c:'Y'},
+ {n:'ABUABID/ABULGASEMM',s:'27B',t:'WCHS',w:1,c:'Y'},{n:'ABUABED/MHAMEDMR',s:'27C',t:'WCHR',w:0,c:'Y'},
+ {n:'FARAJ/THIHEEBAHMRS',s:'25A',t:'WCHR',w:0,c:'Y'}];
+const AC_DEF={URCQX:{c:'8',y:'150',f:'3',cc:'5',h:'1,3,5'}};
+const acs=()=>store.get('mvt_ac')||AC_DEF;
+
+// restore
+const last=store.get('mvt_last');
+if(last)MF.forEach(k=>{if(last[k]!==undefined&&k!=='m_date')$(k).value=last[k]});
+if(last&&last.tog)Object.assign(tog,last.tog);if(last&&last.mode)mode=last.mode;if(last&&last.atype)atype=last.atype;if(last&&last.rsn)Object.assign(rsn,last.rsn);if(last&&last.staT)Object.assign(staT,last.staT);
+$('m_date').value=new Date().toISOString().slice(0,10);
+function syncTog(){[['gpu','m_gpu'],['asu','m_asu'],['wch','m_wch']].forEach(([k,id])=>$(id).setAttribute('aria-pressed',tog[k]?'true':'false'))}
+[['gpu','m_gpu'],['asu','m_asu'],['wch','m_wch']].forEach(([k,id])=>$(id).onclick=()=>{tog[k]=!tog[k];syncTog();run()});
+function fillRegs(){const dl=$('m_regs');dl.innerHTML='';Object.keys(acs()).forEach(r=>{const o=document.createElement('option');o.value=r;dl.appendChild(o)})}
+
+// holds inputs
+function holdList(){return U($('m_holds').value).split(/[,\s]+/).filter(x=>/^\d$/.test(x))}
+function renderHolds(){const box=$('m_holdIn');box.innerHTML='';holdList().forEach(h=>{const d=document.createElement('div');
+  const l=document.createElement('label');l.textContent='عنبر '+h;const i=document.createElement('input');i.inputMode='numeric';i.maxLength=5;i.placeholder='NIL';i.value=holdVals[h]||'';
+  i.oninput=()=>{holdVals[h]=i.value.trim();store.set('mvt_holds',holdVals);run()};d.append(l,i);box.appendChild(d)})}
+$('m_holds').addEventListener('input',()=>{renderHolds();run()});
+
+// aircraft library
+$('m_reg').addEventListener('change',()=>{const a=acs()[U($('m_reg').value)];if(!a)return;$('m_cfgc').value=a.c;$('m_cfgy').value=a.y;$('m_crf').value=a.f;$('m_crc').value=a.cc;$('m_holds').value=a.h;renderHolds();run();toast('تم تحميل بيانات '+U($('m_reg').value))});
+$('m_saveAc').onclick=()=>{const r=U($('m_reg').value);if(!/^[A-Z0-9]{3,7}$/.test(r)){toast('اكتب تسجيل الطائرة أولاً');return}
+  const all=acs();all[r]={c:$('m_cfgc').value,y:$('m_cfgy').value,f:$('m_crf').value,cc:$('m_crc').value,h:$('m_holds').value};store.set('mvt_ac',all);fillRegs();toast('تم حفظ الطائرة '+r)};
+
+// PSM editor
+function renderPax(){const box=$('m_psm');box.innerHTML='';
+  if(!pax.length){box.innerHTML='<div class="rempty" style="padding:12px 14px">لا يوجد ركاب خدمات خاصة — لن تُرسل رسالة PSM.</div>'}
+  pax.forEach((p,i)=>{const r=document.createElement('div');r.className='pax';
+    const nm=document.createElement('input');nm.value=p.n;nm.placeholder='SURNAME/NAMEMR';nm.setAttribute('aria-label','اسم الراكب');nm.oninput=()=>{p.n=U(nm.value).replace(/\s/g,'');savePax();run()};
+    const st=document.createElement('input');st.value=p.s;st.placeholder='SEAT';st.maxLength=4;st.setAttribute('aria-label','المقعد');st.oninput=()=>{p.s=U(st.value);savePax();run()};
+    const op=document.createElement('div');op.className='opts';
+    const mk=(txt,on,fn)=>{const b=document.createElement('button');b.type='button';b.textContent=txt;b.setAttribute('aria-pressed',on?'true':'false');b.onclick=fn;return b};
+    ['WCHS','WCHR','WCHC'].forEach(t=>op.appendChild(mk(t,p.t===t,()=>{p.t=t;savePax();renderPax();run()})));
+    op.appendChild(mk('WCMP',!!p.w,()=>{p.w=p.w?0:1;savePax();renderPax();run()}));
+    op.appendChild(mk('C',p.c==='C',()=>{p.c='C';savePax();renderPax();run()}));
+    op.appendChild(mk('Y',p.c!=='C',()=>{p.c='Y';savePax();renderPax();run()}));
+    const rm=document.createElement('button');rm.type='button';rm.className='rm';rm.textContent='حذف';rm.onclick=()=>{pax.splice(i,1);savePax();renderPax();run()};op.appendChild(rm);
+    r.append(nm,st,op);box.appendChild(r)})}
+function savePax(){store.set('mvt_psm',pax)}
+$('m_addPax').onclick=()=>{pax.push({n:'',s:'',t:'WCHR',w:0,c:'Y'});savePax();renderPax();run();const ins=$('m_psm').querySelectorAll('.pax input');if(ins.length>1)ins[ins.length-2].focus()};
+
+// time helpers
+const toMin=s=>+s.slice(0,2)*60+ +s.slice(2);
+function eaCalc(dateStr,abn,ft,offb){const d=new Date(dateStr+'T00:00:00Z');const roll=(offb&&toMin(abn)<toMin(offb))?1440:0;const t=new Date(d.getTime()+(roll+toMin(abn)+toMin(ft))*60000);
+  const same=t.getUTCDate()===d.getUTCDate();const hm=p2(t.getUTCHours())+p2(t.getUTCMinutes());return{txt:(same?'':p2(t.getUTCDate()))+hm,same,hm,day:t.getUTCDate()}}
+
+function build2(){
+  const v={};MF.forEach(k=>v[k]=k==='m_date'||k==='m_sig'||k==='m_si'||k==='a_si'?$(k).value:U($(k).value));
+  const eM=[],eL=[],wM=[],wL=[];
+  if(!/^[A-Z0-9]{2}[A-Z]?\d{1,5}$/.test(v.m_flt))eM.push('رقم الرحلة غير صحيح');
+  if(!v.m_date)eM.push('اختر التاريخ');
+  if(!/^[A-Z0-9]{3,7}$/.test(v.m_reg))eM.push('تسجيل الطائرة غير صحيح');
+  if(!/^[A-Z]{3}$/.test(v.m_dep))eM.push('محطة المغادرة 3 حروف IATA');
+  if(!/^[A-Z]{3}$/.test(v.m_dest))eM.push('محطة الوصول 3 حروف IATA');
+  const okT=s=>/^([01]\d|2[0-3])[0-5]\d$/.test(s),okD=s=>/^\d{2}[0-5]\d$/.test(s);
+  if(!okT(v.m_offb))eM.push('Off-block بصيغة HHMM');
+  if(!okT(v.m_abn))eM.push('وقت الإقلاع بصيغة HHMM');
+  if(!okD(v.m_ft))eM.push('مدة الطيران بصيغة HHMM');
+  if(okT(v.m_offb)&&okT(v.m_abn)){let taxi=toMin(v.m_abn)-toMin(v.m_offb);if(taxi<0)taxi+=1440;if(taxi>90)wM.push('الفرق بين Off-block والإقلاع '+taxi+' دقيقة — تأكد من الأوقات')}
+  const day=v.m_date?p2(new Date(v.m_date+'T00:00:00Z').getUTCDate()):'';
+  const mon=v.m_date?MON[new Date(v.m_date+'T00:00:00Z').getUTCMonth()]:'';
+  let ea=null;if(v.m_date&&okT(v.m_abn)&&okD(v.m_ft)){ea=eaCalc(v.m_date,v.m_abn,v.m_ft,okT(v.m_offb)?v.m_offb:null);$('m_ea').textContent=ea.hm+'Z'+(ea.same?'':' (يوم '+p2(ea.day)+')');if(!ea.same)wM.push('الوصول في اليوم التالي — كُتب EA بصيغة اليوم+الوقت: '+ea.txt)}else $('m_ea').textContent='—';
+
+  // LDM numbers
+  const num=(k,lab,arr)=>{const x=N(v[k]);if(Number.isNaN(x)){arr.push(lab+' أرقام فقط');return 0}return x||0};
+  const ma=num('m_ma','رجال',eL),fe=num('m_fe','نساء',eL),ch=num('m_ch','أطفال',eL),inf=num('m_in','رضّع',eL);
+  const pc=num('m_pc','درجة C',eL),py=num('m_py','درجة Y',eL),cfc=num('m_cfgc','توزيع C',eL),cfy=num('m_cfgy','توزيع Y',eL);
+  const crf=num('m_crf','طاقم القيادة',eL),crc=num('m_crc','طاقم الضيافة',eL),padc=num('m_padc','PAD C',eL),pady=num('m_pady','PAD Y',eL);
+  const B=N(v.m_b),C=N(v.m_c),E=N(v.m_e),M=N(v.m_m),bags=N(v.m_bags);
+  [[B,'B'],[C,'C'],[E,'E'],[M,'M'],[bags,'عدد الحقائب']].forEach(([x,l])=>{if(Number.isNaN(x))eL.push(l+' أرقام فقط')});
+  const holds=holdList();let T=0;const hs=holds.map(h=>{const x=N(holdVals[h]);if(Number.isNaN(x)){eL.push('عنبر '+h+' أرقام فقط');return h+'/NIL'}T+=x||0;return h+'/'+(x?x:'NIL')});
+  if(!holds.length)eL.push('اكتب أرقام العنابر');
+  $('m_tt').textContent='المجموع T = '+T;
+  const tot=ma+fe+ch;
+  const pxAuto=tot;const pxIn=N(v.m_px);const PX=(pxIn===null||Number.isNaN(pxIn))?pxAuto:pxIn;
+  $('m_pxh').textContent='من LDM: '+pxAuto+(pxIn!==null&&pxIn!==pxAuto?' — يدوي مختلف!':'');
+  if(PX!==tot)wM.push('PX ('+PX+') لا يساوي رجال+نساء+أطفال ('+tot+')');
+  if(pc+py!==tot)wL.push('مجموع الدرجات C+Y ('+(pc+py)+') لا يساوي مجموع الركاب ('+tot+')');
+  if(pc>cfc)wL.push('ركاب C ('+pc+') أكثر من مقاعد C ('+cfc+')');
+  if(py>cfy)wL.push('ركاب Y ('+py+') أكثر من مقاعد Y ('+cfy+')');
+  const load=(B||0)+(C||0)+(E||0)+(M||0);
+  if(load!==T)wL.push('B+C+E+M ('+load+') لا يساوي مجموع العنابر T ('+T+')');
+  if(inf>0)wL.push('يوجد رضّع: PX لا يشملهم ('+inf+' رضيع)');
+
+  // PSM
+  const valid=pax.filter(p=>p.n||p.s);
+  valid.forEach((p,i)=>{if(!/^[A-Z]+\/[A-Z]+$/.test(p.n))wL.push('PSM راكب '+(i+1)+': الاسم بصيغة SURNAME/NAME');if(!/^\d{1,2}[A-Z]$/.test(p.s))wL.push('PSM راكب '+(i+1)+': المقعد غير صحيح')});
+  const ssr=p=>p.w?2:1;const sum=a=>a.reduce((x,p)=>x+ssr(p),0);
+  const wchN=valid.length;
+  const pcC=valid.filter(p=>p.c==='C'),pcY=valid.filter(p=>p.c!=='C');
+
+  // MVT text
+  v0date=v.m_date;const abnT=nd(v.m_offb,v.m_abn);if(abnT!==v.m_abn)wM.push('الإقلاع في اليوم التالي: '+abnT);
+  const mvt=['MVT',v.m_flt+'/'+day+'.'+v.m_reg+'.'+v.m_dep,'AD'+v.m_offb+'/'+abnT+' EA'+(ea?ea.txt:'????')+' '+v.m_dest,'PX'+PX];
+  const rq=[tog.gpu?'GPU UPON ARR':'',tog.asu?'ASU FOR DEP':''].filter(Boolean);if(rq.length)mvt.push('SI.RQST '+rq.join(' AND '));
+  if(tog.wch&&wchN)mvt.push('SI.'+p2(wchN)+'WCH');
+  v.m_si.split('\n').map(x=>U(x)).filter(Boolean).forEach(x=>mvt.push('SI.'+x.replace(/^SI\.?/,'')));
+
+  // LDM text
+  const ldm=['LDM',v.m_flt+'/'+day+'.'+v.m_reg+'.C'+p2(cfc)+'Y'+p2(cfy)+'.'+crf+'/'+crc,
+    '-'+v.m_dest+'.'+[ma,fe,ch,inf].map(p2).join('/')+'..T'+T+'.'+hs.join('.')+'.PAX'+p2(pc)+'/'+p2(py)+'.PAD/'+p2(padc)+'/'+pady,
+    'SI.'+v.m_dest+'.B/'+(B||'NIL')+'.C/'+(C||'NIL')+'.E/'+(E||'NIL')+'.M/'+(M||'NIL')+(bags?'.NBR.BAG.'+bags+(v.m_bsuf?'.'+v.m_bsuf:''):'')];
+
+  // PSM text
+  let psm=[];
+  if(wchN){psm=['PSM',v.m_flt+'/'+day+mon+' '+v.m_dep+' PART01','-'+v.m_dest+' '+p2(wchN)+'PAX/'+p2(sum(valid))+'SSR'];
+    ['WCHS','WCHR','WCHC'].forEach(t=>{const g=valid.filter(p=>p.t===t);if(g.length)psm.push(t+' '+p2(g.length)+'PAX/'+p2(sum(g))+'SSR')});
+    psm.push('C CLASS '+(pcC.length?p2(pcC.length)+'PAX/'+p2(sum(pcC))+'SSR':'NIL'));
+    psm.push('Y CLASS '+(pcY.length?p2(pcY.length)+'PAX/'+p2(sum(pcY))+'SSR':'NIL'));
+    valid.forEach(p=>{psm.push(p.n.padEnd(22,' ')+p.s);psm.push(p.t+' '+(p.w?'WCMP':p.t))});
+    psm.push('ENDPSM')}
+  const sig=v.m_sig.trim();
+  const tM=mvt.join('\n')+(sig?'\n\n\n'+sig:'');
+  const tL=ldm.join('\n')+(psm.length?'\n\n\n'+psm.join('\n'):'')+(sig?'\n\n\n'+sig:'');
+  const tA=mvt.join('\n')+'\n\n\n'+ldm.join('\n')+(psm.length?'\n\n\n'+psm.join('\n'):'')+(sig?'\n\n\n'+sig:'');
+  const AR=buildArr(v,day,okT,okD);const sigA=v.m_sig.trim();const tR=AR.t+(sigA?'\n\n\n'+sigA:'');$('o_arr').textContent=tR;
+  const eA=eM.filter(x=>/رقم الرحلة|التاريخ|تسجيل/.test(x)).concat(AR.e);
+  $('o_mvt').textContent=tM;$('o_ldm').textContent=tL;
+  const show=(id,er,wr)=>{const u=$(id);u.innerHTML='';er.forEach(e=>{const li=document.createElement('li');li.textContent=e;u.appendChild(li)});wr.forEach(e=>{const li=document.createElement('li');li.textContent='⚠ '+e;li.style.color='#B26B00';li.style.listStyle='none';u.appendChild(li)})};
+  show('e_mvt',eM,wM);show('e_ldm',eL,wL);show('e_arr',eA,AR.w);
+  const sv={};MF.forEach(k=>sv[k]=$(k).value);sv.tog=tog;sv.mode=mode;sv.atype=atype;sv.rsn=rsn;sv.staT=staT;store.set('mvt_last',sv);
+  return {tM,tL,tA,eM,eL,wM,wL,tR,eA,wA:AR.w};
+}
+function syncMode(){$('depPane').hidden=mode!=='dep';$('depOut').hidden=mode!=='dep';$('arrPane').hidden=mode!=='arr';$('arrOut').hidden=mode!=='arr';
+  document.querySelectorAll('#mvtMode button').forEach(b=>b.setAttribute('aria-selected',b.dataset.m===mode?'true':'false'));
+  document.querySelectorAll('#arrType button').forEach(b=>b.setAttribute('aria-selected',b.dataset.t===atype?'true':'false'));
+  ['AA','DR','RR','FR'].forEach(t=>document.querySelectorAll('#arrPane .t-'+t).forEach(el=>{const show=el.classList.contains('t-'+atype);if(show)el.removeAttribute('data-hide');else el.setAttribute('data-hide','')}));
+  $('a_staL').textContent={AA:'محطة الوصول (IATA)',DR:'المحطة المُرسِلة (IATA)',RR:'المحطة (IATA)',FR:'المحطة (IATA)'}[atype];
+  $('a_title').firstChild.textContent={AA:'MVT وصول ',DR:'MVT تحويل ',RR:'MVT عودة للموقف ',FR:'MVT عودة بعد الإقلاع '}[atype];
+  document.querySelectorAll('#a_rsn button').forEach(b=>b.setAttribute('aria-pressed',rsn[atype]===b.dataset.r?'true':'false'))}
+document.querySelectorAll('#mvtMode button').forEach(b=>b.onclick=()=>{mode=b.dataset.m;syncMode();run()});
+document.querySelectorAll('#arrType button').forEach(b=>b.onclick=()=>{atype=b.dataset.t;$('a_sta').value=staT[atype]||'';syncMode();run()});
+$('a_sta').addEventListener('input',()=>{staT[atype]=U($('a_sta').value)});
+document.querySelectorAll('#a_rsn button').forEach(b=>b.onclick=()=>{rsn[atype]=rsn[atype]===b.dataset.r?'':b.dataset.r;syncMode();run()});
+function nd(a,b){if(!v0date||!/^\d{4}$/.test(a)||!/^\d{4}$/.test(b)||toMin(b)>=toMin(a))return b;const t=new Date(new Date(v0date+'T00:00:00Z').getTime()+86400000);return p2(t.getUTCDate())+b}
+let v0date='';
+function buildArr(v,day,okT,okD){const e=[],w=[];v0date=v.m_date;
+  const ndw=(a,b,lab)=>{const r=nd(a,b);if(r!==b)w.push(lab+' في اليوم التالي: '+r);return r};
+  const hdr=(sta)=>['MVT',v.m_flt+'/'+day+'.'+v.m_reg+'.'+sta];
+  if(!/^[A-Z]{3}$/.test(v.a_sta))e.push('المحطة 3 حروف IATA');
+  const gap=(a,b,lab,max)=>{if(okT(a)&&okT(b)){let g=toMin(b)-toMin(a);if(g<0)g+=1440;if(g>max)w.push(lab+' '+g+' دقيقة — تأكد من الأوقات')}};
+  let L=hdr(v.a_sta);const R0=rsn[atype];
+  if(atype==='AA'){if(!okT(v.a_td))e.push('وقت الهبوط بصيغة HHMM');if(!okT(v.a_ob))e.push('On-block بصيغة HHMM');gap(v.a_td,v.a_ob,'الفرق بين الهبوط و On-block',60);
+    L.push('AA'+v.a_td+'/'+ndw(v.a_td,v.a_ob,'On-block'))}
+  if(atype==='DR'){['a_orig','a_dra'].forEach((k,i)=>{if(!/^[A-Z]{3}$/.test(v[k]))e.push((i?'مطار التحويل':'الوجهة الأصلية')+' 3 حروف IATA')});
+    if(v.a_orig&&v.a_orig===v.a_dra)w.push('مطار التحويل نفس الوجهة الأصلية');
+    if(!okT(v.a_drt))e.push('وقت القرار بصيغة HHMM');if(!okD(v.a_drft))e.push('المدة المتبقية بصيغة HHMM');
+    let ea='????';if(v.m_date&&okT(v.a_drt)&&okD(v.a_drft)){const x=eaCalc(v.m_date,v.a_drt,v.a_drft);ea=x.txt;$('a_ea').textContent=x.hm+'Z'+(x.same?'':' (يوم '+p2(x.day)+')');if(!x.same)w.push('الوصول في اليوم التالي: EA'+x.txt)}else $('a_ea').textContent='—';
+    L.push('DR'+v.a_drt+' EA'+ea+' '+v.a_dra);L.push('SI.DIVERTED'+(R0?' DUE '+R0:'')+(v.a_orig?' AT '+v.a_orig:''))}
+  if(atype==='RR'){if(!okT(v.a_rrob))e.push('Off-block بصيغة HHMM');if(!okT(v.a_rrt))e.push('وقت الرجوع بصيغة HHMM');gap(v.a_rrob,v.a_rrt,'الفرق بين Off-block والرجوع',120);
+    L.push('AD'+v.a_rrob);L.push('RR'+ndw(v.a_rrob,v.a_rrt,'الرجوع للموقف'));L.push('SI.RTN TO RAMP'+(R0?' DUE '+R0:''))}
+  if(atype==='FR'){if(!okT(v.a_frl))e.push('وقت الهبوط بصيغة HHMM');if(!okT(v.a_frb))e.push('On-block بصيغة HHMM');gap(v.a_frl,v.a_frb,'الفرق بين الهبوط و On-block',60);
+    L.push('FR'+v.a_frl+'/'+ndw(v.a_frl,v.a_frb,'On-block'));L.push('SI.FORCED RTN'+(R0?' DUE '+R0:''))}
+  v.a_si.split('\n').map(x=>U(x)).filter(Boolean).forEach(x=>L.push('SI.'+x.replace(/^SI\.?/,'')));
+  return {t:L.join('\n'),e,w}}
+let R=null;function run(){R=build2()}
+MF.forEach(k=>$(k).addEventListener('input',run));
+
+async function copyText(t){try{await navigator.clipboard.writeText(t);return true}catch(e){try{const ta=document.createElement('textarea');ta.value=t;ta.style.position='fixed';ta.style.opacity='0';document.body.appendChild(ta);ta.select();const ok=document.execCommand('copy');ta.remove();return ok}catch(e2){return false}}}
+async function gate(kind){run();const er=kind==='arr'?R.eA:kind==='mvt'?R.eM:kind==='ldm'?R.eL:R.eM.concat(R.eL);const wr=kind==='arr'?R.wA:kind==='mvt'?R.wM:kind==='ldm'?R.wL:R.wM.concat(R.wL);
+  if(er.length){toast('صحّح الأخطاء أولاً');$(kind==='arr'?'e_arr':kind==='ldm'?'e_ldm':'e_mvt').scrollIntoView({behavior:'smooth',block:'center'});return false}
+  if(wr.length)return await askConfirm('<p>تنبيهات:</p><ul style="font-family:inherit;direction:rtl;text-align:right">'+wr.map(w=>'<li>'+w.replace(/</g,'&lt;')+'</li>').join('')+'</ul>','متابعة','رجوع وتعديل');
+  return true}
+const txt=k=>k==='arr'?R.tR:k==='mvt'?R.tM:k==='ldm'?R.tL:R.tA;
+document.querySelectorAll('[data-cp]').forEach(b=>b.onclick=async()=>{const k=b.dataset.cp;if(!(await gate(k)))return;toast((await copyText(txt(k)))?'تم النسخ':'النسخ غير متاح، انسخ من المربع يدوياً')});
+document.querySelectorAll('[data-wa]').forEach(b=>b.onclick=async()=>{const k=b.dataset.wa;if(!(await gate(k)))return;window.open('https://wa.me/?text='+encodeURIComponent(txt(k)),'_blank')});
+
+syncTog();$('a_sta').value=staT[atype]||$('a_sta').value;syncMode();fillRegs();renderHolds();renderPax();run();
+})();
+// ===== home / navigation =====
+(function(){
+const RM=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
+const DAYS=['SUN','MON','TUE','WED','THU','FRI','SAT'],MO=['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+const P=n=>String(n).padStart(2,'0');
+function tick(){const d=new Date();$('zClock').textContent=P(d.getUTCHours())+':'+P(d.getUTCMinutes());$('zSec').textContent=P(d.getUTCSeconds());
+  $('zDate').textContent=DAYS[d.getUTCDay()]+' '+P(d.getUTCDate())+' '+MO[d.getUTCMonth()]+' '+d.getUTCFullYear();$('tClock').textContent=P(d.getUTCHours())+':'+P(d.getUTCMinutes())+'Z'}
+tick();setInterval(tick,1000);
+function lastInfo(){const f=store.get('fpl_last');$('hFpl').textContent=f&&f.acid?f.acid+'  '+(f.dep||'')+' → '+(f.dest||''):'لا توجد رحلة بعد';
+  const m=store.get('mvt_last');const h=$('hMvt');h.textContent='';
+  if(!m||!m.m_flt){h.textContent='لا توجد رسالة بعد';return}
+  const arr=m.mode==='arr',t={AA:'وصول',DR:'تحويل',RR:'عودة للموقف',FR:'عودة بعد الإقلاع'}[m.atype]||'وصول';
+  const bd=document.createElement('bdi');bd.dir='ltr';bd.textContent=m.m_flt.toUpperCase()+'  '+(arr?((m.staT&&m.staT[m.atype])||''):(m.m_dep||'').toUpperCase()+' → '+(m.m_dest||'').toUpperCase());
+  h.append((arr?t:'مغادرة')+' · ',bd)}
+let cur='home';
+function anim(el,cls){if(RM)return;el.classList.remove('in-fwd','in-back');void el.offsetWidth;el.classList.add(cls);el.addEventListener('animationend',()=>el.classList.remove(cls),{once:true})}
+function go(v,back){const views={home:'viewHome',fpl:'viewFPL',mvt:'viewMVT'};
+  Object.entries(views).forEach(([k,id])=>$(id).hidden=k!==v);
+  $('topbar').hidden=v==='home';$('fplBar').hidden=v!=='fpl';$('tbTitle').textContent=v==='fpl'?'FPL':'MVT';
+  if(v==='home'){lastInfo();anim($('viewHome'),'in-back')}else{anim($(views[v]),back?'in-back':'in-fwd');anim($('topbar'),'in-fade')}
+  try{window.scrollTo(0,0)}catch(e){}cur=v;try{if(v!=='home')history.replaceState(null,'','#'+v);else history.replaceState(null,'',location.pathname+location.search)}catch(e){}
+  if(v==='fpl')window.dispatchEvent(new Event('resize'))}
+document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>go(b.dataset.go));
+$('backBtn').onclick=()=>go('home',true);
+lastInfo();
+let start='';try{start=(location.hash||'').slice(1)}catch(e){}go(['fpl','mvt'].includes(start)?start:'home');
+if(!RM){document.querySelectorAll('.card').forEach((c,i)=>{c.style.animationDelay=(180+i*90)+'ms';c.classList.add('rise')});
+  setTimeout(()=>{try{$('plane').removeAttribute('transform');$('planeAnim').beginElement()}catch(e){$('plane').setAttribute('transform','translate(312 62)')}},150)}
+else{try{$('plane').setAttribute('transform','translate(312 62)')}catch(e){}}
+// soft transitions for panes
+['depPane','arrPane','depOut','arrOut'].forEach(id=>{const el=$(id);new MutationObserver(()=>{if(!el.hidden)anim(el,'in-fade')}).observe(el,{attributes:true,attributeFilter:['hidden']})});
+})();
 </script>
 </body>
 </html>
