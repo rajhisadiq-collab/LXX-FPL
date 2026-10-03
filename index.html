@@ -192,13 +192,54 @@ pre.out{margin:0;padding:14px;font-family:'IBM Plex Mono',monospace;font-size:13
 .in-back{animation:inBack .28s cubic-bezier(.2,.7,.2,1)}
 .in-fade{animation:inFade .2s ease-out}
 @media (prefers-reduced-motion: reduce){.rise,.in-fwd,.in-back,.in-fade{animation:none}.card{transition:none}}
+
+/* ===== lock ===== */
+.lk2{background:transparent;border:1px solid rgba(255,255,255,.25);color:#fff;padding:2px 8px;font-size:13px;border-radius:4px}
+body.locked .wrap,body.locked .bar,body.locked .toast{display:none!important}
+body.locked{overflow:hidden}
+.lock{position:fixed;inset:0;z-index:100;background:#16233B;color:#fff;display:flex;align-items:center;justify-content:center;padding:calc(20px + env(safe-area-inset-top,0px)) 20px calc(20px + env(safe-area-inset-bottom,0px))}
+.lock[hidden]{display:none!important}
+.lock.out{animation:lkOut .35s ease-in forwards}
+@keyframes lkOut{to{opacity:0;transform:scale(1.04)}}
+.lkin{width:100%;max-width:320px;display:flex;flex-direction:column;align-items:center}
+.lkb{display:flex;gap:10px;align-items:center;direction:ltr;margin-bottom:28px}
+.lkico{width:34px;height:34px;fill:none;stroke:#F2B33D;stroke-width:1.8;stroke-linecap:round;margin-bottom:10px}
+.lock h2{font-size:18px;font-weight:600;margin:0 0 18px}
+.dots{display:flex;gap:14px;direction:ltr;margin-bottom:10px}
+.dots i{width:13px;height:13px;border-radius:50%;border:1.6px solid rgba(255,255,255,.7);transition:background .12s,transform .12s}
+.dots i.on{background:#F2B33D;border-color:#F2B33D;transform:scale(1.08)}
+.dots.shake{animation:shake .4s}
+@keyframes shake{20%,60%{transform:translateX(-9px)}40%,80%{transform:translateX(9px)}}
+.lkmsg{min-height:22px;font-size:14px;color:#FFB4A9;margin-bottom:14px}
+.pad{display:grid;grid-template-columns:repeat(3,76px);gap:14px 22px;direction:ltr}
+.pad button{width:76px;height:76px;border-radius:50%;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.07);color:#fff;font-family:'IBM Plex Mono',monospace;font-size:28px;font-weight:500;transition:background .1s}
+.pad button:active{background:rgba(242,179,61,.35)}
+.pad button[data-k=del]{background:transparent;border-color:transparent;font-size:24px}
+.pad button:disabled{opacity:.35}
+.lockbtn{position:absolute;top:14px;inset-inline-end:auto}
+@media (prefers-reduced-motion: reduce){.dots.shake,.lock.out{animation:none}}
 </style>
 </head>
 <body>
+<div class="lock" id="lock" role="dialog" aria-modal="true" aria-labelledby="lkT">
+  <div class="lkin">
+    <div class="lkb"><span class="brand">LIBYAN EXPRESS</span><span class="ops">OPS</span></div>
+    <svg class="lkico" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>
+    <h2 id="lkT">أدخل رمز الدخول</h2>
+    <div class="dots" id="dots" aria-live="polite"><i></i><i></i><i></i><i></i><i></i><i></i></div>
+    <div class="lkmsg" id="lkMsg"></div>
+    <div class="pad" id="kpad">
+      <button type="button" data-k="1">1</button><button type="button" data-k="2">2</button><button type="button" data-k="3">3</button>
+      <button type="button" data-k="4">4</button><button type="button" data-k="5">5</button><button type="button" data-k="6">6</button>
+      <button type="button" data-k="7">7</button><button type="button" data-k="8">8</button><button type="button" data-k="9">9</button>
+      <span></span><button type="button" data-k="0">0</button><button type="button" data-k="del" aria-label="حذف">⌫</button>
+    </div>
+  </div>
+</div>
 <div class="wrap">
   <div id="viewHome" class="view">
     <header class="hero">
-      <div class="hrow"><span class="brand">LIBYAN EXPRESS</span><span class="ops">OPS</span></div>
+      <div class="hrow"><span class="brand">LIBYAN EXPRESS</span><span style="display:flex;gap:8px;align-items:center"><button type="button" id="lockNow" class="lk2" aria-label="قفل المنظومة">🔒</button><span class="ops">OPS</span></span></div>
       <svg class="arc" viewBox="0 0 320 70" aria-hidden="true">
         <path id="arcPath" d="M8 62 Q160 -18 312 62" fill="none" stroke="currentColor" stroke-width="1.4" stroke-dasharray="3 5" opacity=".45"/>
         <circle cx="8" cy="62" r="3.2" fill="#F2B33D"/><circle cx="312" cy="62" r="3.2" fill="#F2B33D"/>
@@ -363,8 +404,8 @@ pre.out{margin:0;padding:14px;font-family:'IBM Plex Mono',monospace;font-size:13
     <section>
       <h2>MVT مغادرة <small>الأوقات بتوقيت Zulu</small></h2>
       <div class="grid">
-        <div><label>محطة المغادرة (IATA)</label><input id="m_dep" value="MJI" maxlength="3"></div>
-        <div><label>محطة الوصول (IATA)</label><input id="m_dest" value="JED" maxlength="3"></div>
+        <div><label>محطة المغادرة (IATA / ICAO)</label><input id="m_dep" value="MJI" maxlength="4"></div>
+        <div><label>محطة الوصول (IATA / ICAO)</label><input id="m_dest" value="JED" maxlength="4"></div>
         <div><label>Off-block</label><input id="m_offb" value="0520" maxlength="4" inputmode="numeric"><div class="hint">HHMM</div></div>
         <div><label>الإقلاع (Airborne)</label><input id="m_abn" value="0532" maxlength="4" inputmode="numeric"><div class="hint">HHMM</div></div>
         <div><label>مدة الطيران</label><input id="m_ft" value="0355" maxlength="4" inputmode="numeric"><div class="hint">HHMM</div></div>
@@ -437,11 +478,11 @@ pre.out{margin:0;padding:14px;font-family:'IBM Plex Mono',monospace;font-size:13
       <section>
         <h2 id="a_title">MVT وصول <small>الأوقات بتوقيت Zulu</small></h2>
         <div class="grid">
-          <div><label id="a_staL">محطة الوصول (IATA)</label><input id="a_sta" value="TUN" maxlength="3"></div>
+          <div><label id="a_staL">محطة الوصول (IATA / ICAO)</label><input id="a_sta" value="TUN" maxlength="4"></div>
           <div class="t-AA"><label>الهبوط (Touchdown)</label><input id="a_td" value="1100" maxlength="4" inputmode="numeric"><div class="hint">HHMM</div></div>
           <div class="t-AA"><label>On-block</label><input id="a_ob" value="1105" maxlength="4" inputmode="numeric"><div class="hint">HHMM</div></div>
-          <div class="t-DR"><label>الوجهة الأصلية (IATA)</label><input id="a_orig" value="TUN" maxlength="3"></div>
-          <div class="t-DR"><label>مطار التحويل (IATA)</label><input id="a_dra" value="SFA" maxlength="3"></div>
+          <div class="t-DR"><label>الوجهة الأصلية (IATA / ICAO)</label><input id="a_orig" value="TUN" maxlength="4"></div>
+          <div class="t-DR"><label>مطار التحويل (IATA / ICAO)</label><input id="a_dra" value="SFA" maxlength="4"></div>
           <div class="t-DR"><label>وقت قرار التحويل</label><input id="a_drt" value="1040" maxlength="4" inputmode="numeric"><div class="hint">HHMM</div></div>
           <div class="t-DR"><label>مدة الطيران المتبقية</label><input id="a_drft" value="0035" maxlength="4" inputmode="numeric"><div class="hint">HHMM</div></div>
           <div class="t-DR"><label>EA إلى مطار التحويل</label><div class="calc" id="a_ea">—</div><div class="hint">يُحسب تلقائياً</div></div>
@@ -505,6 +546,34 @@ MJI FLIGHT WATCH</textarea></div></div>
 
 <script>
 const $=id=>document.getElementById(id);
+// ===== access lock =====
+(function(){
+const H='a76b7f25b6ba5ec51bd9fa42f4143b63c2495996e783baa4d9f8459d314f6ad2';
+let ok=false;try{ok=sessionStorage.getItem('ops_ok')==='1'}catch(e){}
+if(ok){$('lock').hidden=true;return}
+document.body.classList.add('locked');
+let code='',fails=0,blockUntil=0;
+const dots=[...document.querySelectorAll('#dots i')];
+function paint(){dots.forEach((d,i)=>d.classList.toggle('on',i<code.length))}
+function sha(t){if(window.crypto&&crypto.subtle&&window.TextEncoder){return crypto.subtle.digest('SHA-256',new TextEncoder().encode(t)).then(b=>[...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join(''))}
+  return Promise.resolve(sha256js(t))}
+function sha256js(m){function r(n,x){return(x>>>n)|(x<<(32-n))}const K=[],Hh=[];let p=2,c=0;while(c<64){let pr=true;for(let i=2;i*i<=p;i++)if(p%i===0){pr=false;break}if(pr){const fr=v=>((v-Math.floor(v))*4294967296)|0;if(c<8)Hh[c]=fr(Math.pow(p,.5));K[c++]=fr(Math.pow(p,1/3))}p++}
+  const b=unescape(encodeURIComponent(m)),l=b.length*8,w=[];let i;for(i=0;i<b.length;i++)w[i>>2]|=b.charCodeAt(i)<<((3-i%4)*8);w[i>>2]|=0x80<<((3-i%4)*8);w[((b.length+8>>6)<<4)+15]=l;for(let q=0;q<w.length;q++)w[q]=w[q]|0;const h=Hh.slice();
+  for(let j=0;j<w.length;j+=16){const W=w.slice(j,j+16);let[a,bb,cc,d,e,f,g,hh]=h;for(i=0;i<64;i++){if(i>=16){const x=W[i-15],y=W[i-2];W[i]=(W[i-16]+(r(7,x)^r(18,x)^(x>>>3))+W[i-7]+(r(17,y)^r(19,y)^(y>>>10)))|0}
+    const t1=hh+(r(6,e)^r(11,e)^r(25,e))+((e&f)^(~e&g))+K[i]+(W[i]|0),t2=(r(2,a)^r(13,a)^r(22,a))+((a&bb)^(a&cc)^(bb&cc));hh=g;g=f;f=e;e=(d+t1)|0;d=cc;cc=bb;bb=a;a=(t1+t2)|0}
+    h[0]=(h[0]+a)|0;h[1]=(h[1]+bb)|0;h[2]=(h[2]+cc)|0;h[3]=(h[3]+d)|0;h[4]=(h[4]+e)|0;h[5]=(h[5]+f)|0;h[6]=(h[6]+g)|0;h[7]=(h[7]+hh)|0}
+  return h.map(x=>(x>>>0).toString(16).padStart(8,'0')).join('')}
+function setPad(dis){document.querySelectorAll('#kpad button').forEach(b=>b.disabled=dis)}
+function check(){sha(code).then(x=>{if(x===H){try{sessionStorage.setItem('ops_ok','1')}catch(e){}
+    const L=$('lock');L.classList.add('out');document.body.classList.remove('locked');setTimeout(()=>{L.hidden=true;L.classList.remove('out')},340);window.dispatchEvent(new Event('resize'));if(window.__intro)window.__intro();}
+  else{fails++;const D=$('dots');D.classList.remove('shake');void D.offsetWidth;D.classList.add('shake');code='';paint();
+    if(fails>=5){blockUntil=Date.now()+30000;setPad(true);let t=30;$('lkMsg').textContent='محاولات كثيرة — انتظر '+t+' ثانية';
+      const iv=setInterval(()=>{t--;$('lkMsg').textContent='محاولات كثيرة — انتظر '+t+' ثانية';if(t<=0){clearInterval(iv);fails=0;setPad(false);$('lkMsg').textContent=''}},1000)}
+    else $('lkMsg').textContent='رمز غير صحيح'}})}
+function key(k){if(Date.now()<blockUntil)return;if(k==='del'){code=code.slice(0,-1)}else if(code.length<6){code+=k;$('lkMsg').textContent=''}paint();if(code.length===6)setTimeout(check,120)}
+document.querySelectorAll('#kpad button').forEach(b=>b.onclick=()=>key(b.dataset.k));
+document.addEventListener('keydown',e=>{if(!document.body.classList.contains('locked'))return;if(/^\d$/.test(e.key))key(e.key);else if(e.key==='Backspace')key('del')});
+})();
 const F=['acid','dof','dep','eobt','dest','eet','altn','altn2','spd','lvl','route','endur','pob','other','remarks','pic','dname','lic','reg','type','wtc','rules','equip','colour','orig'];
 const store={get(k){try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
 function toast(t){const e=$('toast');const ok=/^تم(?! الإلغاء)/.test(t);e.innerHTML='';if(ok){e.insertAdjacentHTML('beforeend','<svg class="tick" viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10.5l4 4 8-9"/></svg>')}e.appendChild(document.createTextNode(t));e.classList.toggle('ok',ok);e.classList.add('on');clearTimeout(e._t);e._t=setTimeout(()=>e.classList.remove('on'),2200)}
@@ -853,8 +922,8 @@ function build2(){
   if(!/^[A-Z0-9]{2}[A-Z]?\d{1,5}$/.test(v.m_flt))eM.push('رقم الرحلة غير صحيح');
   if(!v.m_date)eM.push('اختر التاريخ');
   if(!/^[A-Z0-9]{3,7}$/.test(v.m_reg))eM.push('تسجيل الطائرة غير صحيح');
-  if(!/^[A-Z]{3}$/.test(v.m_dep))eM.push('محطة المغادرة 3 حروف IATA');
-  if(!/^[A-Z]{3}$/.test(v.m_dest))eM.push('محطة الوصول 3 حروف IATA');
+  if(!/^[A-Z]{3,4}$/.test(v.m_dep))eM.push('محطة المغادرة 3 أو 4 حروف');
+  if(!/^[A-Z]{3,4}$/.test(v.m_dest))eM.push('محطة الوصول 3 أو 4 حروف');
   const okT=s=>/^([01]\d|2[0-3])[0-5]\d$/.test(s),okD=s=>/^\d{2}[0-5]\d$/.test(s);
   if(!okT(v.m_offb))eM.push('Off-block بصيغة HHMM');
   if(!okT(v.m_abn))eM.push('وقت الإقلاع بصيغة HHMM');
@@ -928,7 +997,7 @@ function syncMode(){$('depPane').hidden=mode!=='dep';$('depOut').hidden=mode!=='
   document.querySelectorAll('#mvtMode button').forEach(b=>b.setAttribute('aria-selected',b.dataset.m===mode?'true':'false'));
   document.querySelectorAll('#arrType button').forEach(b=>b.setAttribute('aria-selected',b.dataset.t===atype?'true':'false'));
   ['AA','DR','RR','FR'].forEach(t=>document.querySelectorAll('#arrPane .t-'+t).forEach(el=>{const show=el.classList.contains('t-'+atype);if(show)el.removeAttribute('data-hide');else el.setAttribute('data-hide','')}));
-  $('a_staL').textContent={AA:'محطة الوصول (IATA)',DR:'المحطة المُرسِلة (IATA)',RR:'المحطة (IATA)',FR:'المحطة (IATA)'}[atype];
+  $('a_staL').textContent={AA:'محطة الوصول (IATA / ICAO)',DR:'المحطة المُرسِلة (IATA / ICAO)',RR:'المحطة (IATA / ICAO)',FR:'المحطة (IATA / ICAO)'}[atype];
   $('a_title').firstChild.textContent={AA:'MVT وصول ',DR:'MVT تحويل ',RR:'MVT عودة للموقف ',FR:'MVT عودة بعد الإقلاع '}[atype];
   document.querySelectorAll('#a_rsn button').forEach(b=>b.setAttribute('aria-pressed',rsn[atype]===b.dataset.r?'true':'false'))}
 document.querySelectorAll('#mvtMode button').forEach(b=>b.onclick=()=>{mode=b.dataset.m;syncMode();run()});
@@ -940,12 +1009,12 @@ let v0date='';
 function buildArr(v,day,okT,okD){const e=[],w=[];v0date=v.m_date;
   const ndw=(a,b,lab)=>{const r=nd(a,b);if(r!==b)w.push(lab+' في اليوم التالي: '+r);return r};
   const hdr=(sta)=>['MVT',v.m_flt+'/'+day+'.'+v.m_reg+'.'+sta];
-  if(!/^[A-Z]{3}$/.test(v.a_sta))e.push('المحطة 3 حروف IATA');
+  if(!/^[A-Z]{3,4}$/.test(v.a_sta))e.push('المحطة 3 أو 4 حروف');
   const gap=(a,b,lab,max)=>{if(okT(a)&&okT(b)){let g=toMin(b)-toMin(a);if(g<0)g+=1440;if(g>max)w.push(lab+' '+g+' دقيقة — تأكد من الأوقات')}};
   let L=hdr(v.a_sta);const R0=rsn[atype];
   if(atype==='AA'){if(!okT(v.a_td))e.push('وقت الهبوط بصيغة HHMM');if(!okT(v.a_ob))e.push('On-block بصيغة HHMM');gap(v.a_td,v.a_ob,'الفرق بين الهبوط و On-block',60);
     L.push('AA'+v.a_td+'/'+ndw(v.a_td,v.a_ob,'On-block'))}
-  if(atype==='DR'){['a_orig','a_dra'].forEach((k,i)=>{if(!/^[A-Z]{3}$/.test(v[k]))e.push((i?'مطار التحويل':'الوجهة الأصلية')+' 3 حروف IATA')});
+  if(atype==='DR'){['a_orig','a_dra'].forEach((k,i)=>{if(!/^[A-Z]{3,4}$/.test(v[k]))e.push((i?'مطار التحويل':'الوجهة الأصلية')+' 3 أو 4 حروف')});
     if(v.a_orig&&v.a_orig===v.a_dra)w.push('مطار التحويل نفس الوجهة الأصلية');
     if(!okT(v.a_drt))e.push('وقت القرار بصيغة HHMM');if(!okD(v.a_drft))e.push('المدة المتبقية بصيغة HHMM');
     let ea='????';if(v.m_date&&okT(v.a_drt)&&okD(v.a_drft)){const x=eaCalc(v.m_date,v.a_drt,v.a_drft);ea=x.txt;$('a_ea').textContent=x.hm+'Z'+(x.same?'':' (يوم '+p2(x.day)+')');if(!x.same)w.push('الوصول في اليوم التالي: EA'+x.txt)}else $('a_ea').textContent='—';
@@ -996,9 +1065,11 @@ document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>go(b.dataset.go)
 $('backBtn').onclick=()=>go('home',true);
 lastInfo();
 let start='';try{start=(location.hash||'').slice(1)}catch(e){}go(['fpl','mvt'].includes(start)?start:'home');
-if(!RM){document.querySelectorAll('.card').forEach((c,i)=>{c.style.animationDelay=(180+i*90)+'ms';c.classList.add('rise')});
+function intro(){if(!RM){document.querySelectorAll('.card').forEach((c,i)=>{c.classList.remove('rise');void c.offsetWidth;c.style.animationDelay=(180+i*90)+'ms';c.classList.add('rise')});
   setTimeout(()=>{try{$('plane').removeAttribute('transform');$('planeAnim').beginElement()}catch(e){$('plane').setAttribute('transform','translate(312 62)')}},150)}
-else{try{$('plane').setAttribute('transform','translate(312 62)')}catch(e){}}
+else{try{$('plane').setAttribute('transform','translate(312 62)')}catch(e){}}}
+window.__intro=intro;if(!document.body.classList.contains('locked'))intro();
+$('lockNow').onclick=()=>{try{sessionStorage.removeItem('ops_ok')}catch(e){}location.reload()};
 // soft transitions for panes
 ['depPane','arrPane','depOut','arrOut'].forEach(id=>{const el=$(id);new MutationObserver(()=>{if(!el.hidden)anim(el,'in-fade')}).observe(el,{attributes:true,attributeFilter:['hidden']})});
 })();
