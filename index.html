@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>خطة الطيران — ATR</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+:root{
+  --bg:#E9EDF1; --paper:#FFFFFF; --ink:#16233B; --muted:#5B6678; --line:#C9D1DB;
+  --strip:#F2B33D; --stripInk:#3A2A05; --err:#B3261E; --ok:#1F7A4D; --field:#F7F9FB;
+  box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0F1724; --paper:#17223A; --ink:#E6ECF5; --muted:#9AA6BA; --line:#2C3A55;
+    --strip:#E0A22E; --stripInk:#241900; --err:#FF8A80; --ok:#6FD3A0; --field:#111B2E;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0F1724; --paper:#17223A; --ink:#E6ECF5; --muted:#9AA6BA; --line:#2C3A55;
+  --strip:#E0A22E; --stripInk:#241900; --err:#FF8A80; --ok:#6FD3A0; --field:#111B2E;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"IBM Plex Sans Arabic",Tahoma,"Segoe UI",sans-serif;font-size:16px;line-height:1.5}
+.wrap{max-width:760px;margin:0 auto;padding:16px 14px 120px}
+
+/* flight strip header */
+.strip{display:grid;grid-template-columns:auto 1fr auto;gap:0;background:var(--strip);color:var(--stripInk);border-radius:6px;overflow:hidden;margin-bottom:18px}
+.strip>div{padding:10px 14px;border-inline-start:2px solid rgba(0,0,0,.18)}
+.strip>div:first-child{border:none}
+.strip .cs{font-family:"IBM Plex Mono",monospace;font-weight:600;font-size:26px;letter-spacing:.04em;direction:ltr}
+.strip .rt{font-family:"IBM Plex Mono",monospace;font-size:15px;direction:ltr;text-align:left;display:flex;flex-direction:column;justify-content:center}
+.strip .rt b{font-size:20px}
+.strip .tm{font-family:"IBM Plex Mono",monospace;direction:ltr;text-align:left;font-size:14px;display:flex;flex-direction:column;justify-content:center}
+h1{font-size:15px;font-weight:600;color:var(--muted);margin:0 0 6px}
+
+section{background:var(--paper);border:1px solid var(--line);border-radius:6px;margin-bottom:14px}
+section>h2{font-size:17px;margin:0;padding:12px 14px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:baseline}
+section>h2 small{font-weight:400;color:var(--muted);font-size:13px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;padding:14px}
+.full{grid-column:1/-1}
+.grid>div{min-width:0}
+input[type=date]{-webkit-appearance:none;appearance:none;display:block;min-width:0;max-width:100%;width:100%;height:44px;line-height:24px;text-align:left}
+input[type=date]::-webkit-date-and-time-value{text-align:left}
+input[type=date]::-webkit-calendar-picker-indicator{margin:0}
+label{display:block;font-size:13px;color:var(--muted);margin-bottom:4px}
+label .n{font-family:"IBM Plex Mono",monospace;color:var(--ink);font-weight:600;margin-inline-end:4px}
+input,select,textarea{width:100%;font:inherit;font-family:"IBM Plex Mono",monospace;font-size:16px;color:var(--ink);background:var(--field);border:1px solid var(--line);border-radius:4px;padding:9px 10px;direction:ltr;text-align:left;text-transform:uppercase}
+textarea{min-height:64px;resize:vertical}
+input.ar{font-family:inherit;text-transform:none;direction:rtl;text-align:right}
+input:focus,select:focus,textarea:focus{outline:2px solid var(--strip);outline-offset:1px}
+input.bad{border-color:var(--err);background:color-mix(in srgb,var(--err) 8%,var(--field))}
+.hint{font-size:12px;color:var(--muted);margin-top:3px}
+details summary{cursor:pointer;padding:12px 14px;font-weight:600;list-style:none}
+details summary::-webkit-details-marker{display:none}
+details summary::after{content:"＋";float:left;color:var(--muted)}
+details[open] summary::after{content:"－"}
+details[open] summary{border-bottom:1px solid var(--line)}
+
+.sig{padding:14px}
+canvas#pad{width:100%;height:150px;background:var(--field);border:1px dashed var(--line);border-radius:4px;touch-action:none;display:block}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+button{font:inherit;font-weight:600;border-radius:4px;border:1px solid var(--line);background:var(--paper);color:var(--ink);padding:10px 14px;cursor:pointer}
+button:focus-visible{outline:2px solid var(--strip);outline-offset:2px}
+button.primary{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+button.wa{background:#1F8F55;color:#fff;border-color:#1F8F55}
+
+pre#msg{margin:0;padding:14px;font-family:"IBM Plex Mono",monospace;font-size:14px;white-space:pre-wrap;word-break:break-word;direction:ltr;text-align:left;overflow-x:auto}
+.seg{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}.seg button{font-family:'IBM Plex Mono',monospace;font-size:20px;padding:8px 4px;display:flex;flex-direction:column;align-items:center;line-height:1.2;background:var(--field)}.seg button small{font-family:'IBM Plex Sans Arabic',sans-serif;font-size:11px;font-weight:400;color:var(--muted)}.seg button[aria-checked=true]{background:var(--strip);color:var(--stripInk);border-color:var(--strip)}.seg button[aria-checked=true] small{color:var(--stripInk)}
+.pobrow{display:flex;gap:6px}.pobrow input{flex:1;min-width:0}#tbnBtn{font-family:'IBM Plex Mono',monospace;padding:9px 12px}#tbnBtn[aria-pressed=true]{background:var(--strip);color:var(--stripInk);border-color:var(--strip)}
+.xs{padding:14px;display:grid;gap:14px}.xg>span{display:block;font-size:13px;color:var(--muted);margin-bottom:6px}
+.xr{display:flex;gap:8px;flex-wrap:wrap}
+.xb{position:relative;width:64px;padding:6px 0 4px;display:flex;flex-direction:column;align-items:center;gap:2px;background:var(--field)}
+.xb b{font-family:'IBM Plex Mono',monospace;font-size:20px;width:30px;height:30px;line-height:28px;text-align:center;border:1.5px solid var(--ink);background:var(--paper);position:relative}
+.xb small{font-size:9.5px;color:var(--muted);font-weight:500}
+.xb[aria-pressed=true] b::before,.xb[aria-pressed=true] b::after{content:"";position:absolute;left:-2px;right:-2px;top:50%;height:2.5px;background:var(--err);transform:rotate(45deg)}
+.xb[aria-pressed=true] b::after{transform:rotate(-45deg)}
+.xb[aria-pressed=true]{border-color:var(--err)}
+.modal{position:fixed;inset:0;background:rgba(10,16,28,.55);display:flex;align-items:center;justify-content:center;padding:20px;z-index:50}.modal[hidden]{display:none}
+.mbox{background:var(--paper);color:var(--ink);border-radius:8px;padding:18px;max-width:380px;width:100%;border-top:5px solid var(--strip)}.mbox h3{margin:0 0 8px;font-size:18px}.mbox p{margin:0 0 6px}.mbox .row button{flex:1}
+.rsearch{padding:14px 14px 0}.rres{display:grid;gap:8px;margin-top:8px;max-height:340px;overflow-y:auto}
+.rc{display:grid;grid-template-columns:1fr auto;gap:4px 10px;align-items:start;text-align:right;border:1px solid var(--line);border-inline-start:5px solid var(--strip);border-radius:6px;padding:10px 12px;background:var(--field);cursor:pointer;font-weight:400}
+.rc.cur{border-color:var(--ink);border-inline-start-color:var(--ink)}
+.rc .pr{font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:17px;direction:ltr;text-align:left}
+.rc .nm{font-size:12px;color:var(--muted)}
+.rc .meta{grid-column:1/-1;font-family:'IBM Plex Mono',monospace;font-size:12.5px;color:var(--muted);direction:ltr;text-align:left}
+.rc .rt2{grid-column:1/-1;font-family:'IBM Plex Mono',monospace;font-size:13px;direction:ltr;text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rc .del{grid-row:1/3;grid-column:2;font-size:12px;padding:6px 10px;color:var(--err);background:var(--paper)}
+.rempty{font-size:14px;color:var(--muted);padding:6px 2px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;padding:14px 14px 4px;direction:ltr}
+.chip{display:inline-flex;align-items:center;gap:6px;border:1.5px solid var(--ink);border-radius:4px;padding:4px 4px 4px 9px;background:var(--paper);font-family:'IBM Plex Mono',monospace;font-size:15px;font-weight:600}
+.chip small{font-family:'IBM Plex Sans Arabic',sans-serif;font-weight:400;font-size:11px;color:var(--muted)}
+.chip.uc{border-style:dashed;border-color:#C9861A;background:color-mix(in srgb,var(--strip) 22%,var(--paper))}
+.chip.uc::after{content:"؟";color:#9A5E00;font-family:'IBM Plex Sans Arabic',sans-serif}
+.chip.mn{border-color:var(--muted);border-style:dotted}
+.chip button{border:none;background:transparent;padding:2px 7px;font-size:16px;line-height:1;color:var(--muted)}
+.arow{display:flex;gap:6px;padding:8px 14px}.arow input{flex:1;min-width:0}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--muted);padding:0 14px 12px}
+.legend .k{display:inline-block;width:14px;height:10px;border:1.5px solid var(--ink);margin-inline-end:5px;vertical-align:middle}
+.legend .k.uc{border-style:dashed;border-color:#C9861A;background:color-mix(in srgb,var(--strip) 30%,transparent)}.legend .k.mn{border-style:dotted;border-color:var(--muted)}
+details.dir{background:var(--paper);border:1px solid var(--line);border-radius:6px;margin-bottom:14px}
+.dirin{padding:14px;display:grid;gap:12px}
+.ap{border:1px solid var(--line);border-radius:6px;padding:10px}
+.ap h4{margin:0 0 8px;display:flex;justify-content:space-between;align-items:center;font-size:15px}
+.ap h4 span{font-family:'IBM Plex Mono',monospace;direction:ltr}
+.ap h4 button{font-size:12px;padding:4px 8px;color:var(--err)}
+.ap .chips{padding:0 0 8px}
+.ap .chip{cursor:pointer}
+.ap .arow{padding:0}
+.newap{display:grid;grid-template-columns:90px 1fr auto;gap:6px}
+.mbox ul{margin:6px 0;padding-inline-start:18px;font-family:'IBM Plex Mono',monospace;direction:ltr;text-align:left}
+.chk{display:flex;flex-wrap:wrap;gap:8px}.chk label{display:flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:4px;padding:7px 10px;margin:0;color:var(--ink);font-family:'IBM Plex Mono',monospace;font-size:14px;background:var(--field)}.chk input{width:auto;margin:0;accent-color:var(--ink)}
+.errs{margin:0;padding:10px 14px 10px 14px;color:var(--err);font-size:14px;list-style:none;border-top:1px solid var(--line)}
+.errs:empty{display:none}
+.errs li::before{content:"✕ ";}
+
+.bar{position:fixed;bottom:0;left:0;right:0;background:var(--paper);border-top:1px solid var(--line);padding:10px 14px calc(10px + env(safe-area-inset-bottom,0px))}
+.bar .in{max-width:760px;margin:0 auto;display:flex;gap:8px}
+.bar button{flex:1}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(84px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--paper);padding:9px 16px;border-radius:4px;font-size:14px;opacity:0;pointer-events:none;transition:opacity .2s}
+.toast.on{opacity:1}
+@media (prefers-reduced-motion: reduce){.toast{transition:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>خطة طيران ICAO — طائرات ATR، الليبية السريعة</h1>
+  <div class="strip" aria-live="polite">
+    <div class="cs" id="sCs">LXX340</div>
+    <div class="rt"><b id="sRt">HLLM → HLLS</b><span id="sReg">5AATR · AT45</span></div>
+    <div class="tm"><span id="sOff">EOBT 0600Z</span><span id="sEta">ETA 0727Z</span></div>
+  </div>
+
+  <section>
+    <h2>بيانات الرحلة <small>الأوقات بتوقيت Zulu</small></h2>
+    <div class="grid">
+      <div><label><span class="n">7</span>رقم الرحلة</label><input id="acid" value="LXX340" maxlength="7"></div>
+      <div class="full"><label>نوع الرحلة (Type of flight)</label><div class="seg" id="tofSeg" role="radiogroup" aria-label="نوع الرحلة">
+        <button type="button" data-v="S" role="radio">S<small>مجدولة</small></button><button type="button" data-v="N" role="radio">N<small>غير مجدولة</small></button><button type="button" data-v="M" role="radio">M<small>عسكرية</small></button><button type="button" data-v="X" role="radio">X<small>أخرى</small></button></div></div>
+      <div><label>التاريخ (DOF)</label><input id="dof" type="date"></div>
+      <div><label><span class="n">13</span>مطار الإقلاع</label><input id="dep" value="HLLM" maxlength="4"></div>
+      <div><label>وقت الإقلاع EOBT (Z)</label><input id="eobt" value="0600" maxlength="4" inputmode="numeric"><div class="hint">HHMM</div></div>
+      <div><label><span class="n">16</span>مطار الوصول</label><input id="dest" value="HLLS" maxlength="4"></div>
+      <div><label>مدة الطيران EET</label><input id="eet" value="0127" maxlength="4" inputmode="numeric"><div class="hint">HHMM</div></div>
+      <div><label>البديل</label><input id="altn" value="HLGT" maxlength="4"></div>
+      <div><label>البديل الثاني</label><input id="altn2" value="" maxlength="4" placeholder="—"></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>عناوين الإرسال (FF) <small id="addrCount"></small></h2>
+    <div class="chips" id="chips" role="list"></div>
+    <div class="arow"><input id="addAddr" maxlength="8" placeholder="عنوان يدوي" aria-label="إضافة عنوان يدوي"><button type="button" id="addAddrBtn">إضافة</button><button type="button" id="resetAddr">إعادة الضبط</button></div>
+    <div class="legend"><span><i class="k ok"></i>مؤكد</span><span><i class="k uc"></i>غير مؤكد، تحقق منه</span><span><i class="k mn"></i>يدوي</span></div>
+  </section>
+
+  <details class="dir">
+    <summary>دليل العناوين</summary>
+    <div class="dirin">
+      <div class="hint">كل مطار تكتبه في الإقلاع أو الوصول أو البديل تُضاف عناوينه تلقائياً. اضغط على العنوان لتبديل حالته بين مؤكد وغير مؤكد.</div>
+      <div id="dirList"></div>
+      <div class="newap"><input id="newCode" maxlength="4" placeholder="ICAO"><input id="newName" class="ar" placeholder="اسم المطار"><button type="button" id="newApBtn">إضافة مطار</button></div>
+    </div>
+  </details>
+
+  <section>
+    <h2>المسار <small>البند 15</small></h2>
+    <div class="rsearch">
+      <label for="rq">المسارات المحفوظة</label>
+      <input id="rq" class="ar" placeholder="ابحث: HLLM-HLLS أو سبها" autocomplete="off">
+      <div id="rres" class="rres" role="list"></div>
+    </div>
+    <div class="grid">
+      <div><label>السرعة (عقدة)</label><input id="spd" value="292" inputmode="numeric" maxlength="4"></div>
+      <div><label>الارتفاع (FL)</label><input id="lvl" value="190" inputmode="numeric" maxlength="3"></div>
+      <div class="full"><label>المسار</label><textarea id="route">IZD2D IZD V800 WANIN DCT AGAAR DCT SEB DCT</textarea>
+        <div class="row"><button type="button" class="primary" id="saveRoute">حفظ المسار</button></div>
+        <div class="hint">يُحفظ لكل زوج مطارات: المسار، السرعة، الارتفاع، المدة، والبدائل.</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>الوقود والركاب <small>البند 19</small></h2>
+    <div class="grid">
+      <div><label>الوقود يكفي (Endurance)</label><input id="endur" value="0601" maxlength="4" inputmode="numeric"><div class="hint">HHMM</div></div>
+      <div><label>عدد الأشخاص على متن الطائرة</label><div class="pobrow"><input id="pob" value="19" inputmode="numeric" maxlength="3"><button type="button" id="tbnBtn" aria-pressed="false">TBN</button></div><div class="hint">رقم، أو TBN (يُبلَّغ لاحقاً)</div></div>
+      <div class="full"><label><span class="n">18</span>معلومات إضافية (اختياري)</label><input id="other" placeholder="مثال: RMK/... OPR/LXX"><div class="hint">DOF و REG تُضاف تلقائياً.</div></div>
+      <div class="full"><label>ملاحظات N/ (اختياري)</label><input id="remarks" placeholder="يُشطب في النموذج إذا تُرك فارغاً"></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>معدات الطوارئ والنجاة <small>اضغط على الحرف لوضع X</small></h2>
+    <div class="xs">
+      <div class="xg"><span>R/ راديو الطوارئ</span><div class="xr"><button type="button" class="xb" data-g="radio" data-v="U" aria-pressed="false"><b>U</b><small>UHF</small></button><button type="button" class="xb" data-g="radio" data-v="V" aria-pressed="false"><b>V</b><small>VHF</small></button><button type="button" class="xb" data-g="radio" data-v="E" aria-pressed="false"><b>E</b><small>ELT</small></button></div></div>
+      <div class="xg"><span>S/ معدات النجاة</span><div class="xr"><button type="button" class="xb" data-g="surv" data-v="P" aria-pressed="false"><b>P</b><small>POLAR</small></button><button type="button" class="xb" data-g="surv" data-v="D" aria-pressed="false"><b>D</b><small>DESERT</small></button><button type="button" class="xb" data-g="surv" data-v="M" aria-pressed="false"><b>M</b><small>MARITIME</small></button><button type="button" class="xb" data-g="surv" data-v="J" aria-pressed="false"><b>J</b><small>JUNGLE</small></button></div></div>
+      <div class="xg"><span>J/ سترات النجاة</span><div class="xr"><button type="button" class="xb" data-g="jack" data-v="L" aria-pressed="false"><b>L</b><small>LIGHT</small></button><button type="button" class="xb" data-g="jack" data-v="F" aria-pressed="false"><b>F</b><small>FLUORES</small></button><button type="button" class="xb" data-g="jack" data-v="U" aria-pressed="false"><b>U</b><small>UHF</small></button><button type="button" class="xb" data-g="jack" data-v="V" aria-pressed="false"><b>V</b><small>VHF</small></button></div></div>
+      <div class="hint">الحرف المشطوب بـ X يعني أن المعدة غير موجودة على الطائرة. إذا شطبت كل حروف مجموعة يُشطب حرف المجموعة نفسه (S أو J).</div>
+    </div>
+  </section>
+
+  <section>
+    <h2>قائد الرحلة <small>يظهر في C/</small></h2>
+    <div class="grid">
+      <div class="full"><label>اسم قائد الرحلة (بالإنجليزي)</label><input id="pic" placeholder="CAPT NAME"></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>المُرحِّل <small>يظهر في صندوق FILED BY</small></h2>
+    <div class="grid">
+      <div class="full"><label>اسم المُرحِّل (بالإنجليزي)</label><input id="dname" placeholder="DISPATCHER NAME"></div>
+      <div class="full"><label>رقم رخصة المُرحِّل</label><input id="lic" placeholder="1877"></div>
+    </div>
+    <div class="sig">
+      <label>توقيع المُرحِّل — وقّع بإصبعك داخل المربع</label>
+      <canvas id="pad" aria-label="مساحة توقيع المرحل"></canvas>
+      <div class="row"><button type="button" id="clearSig">مسح التوقيع</button><button type="button" id="savePic">حفظ بيانات المُرحِّل</button></div>
+    </div>
+  </section>
+
+  <details style="background:var(--paper);border:1px solid var(--line);border-radius:6px;margin-bottom:14px">
+    <summary>بيانات الطائرة الثابتة (ATR)</summary>
+    <div class="grid">
+      <div><label>التسجيل REG</label><input id="reg" value="5AATR"></div>
+      <div><label><span class="n">9</span>النوع</label><input id="type" value="AT45"></div>
+      <div><label>فئة الاضطراب</label><input id="wtc" value="M" maxlength="1"></div>
+      <div><label><span class="n">8</span>قواعد الطيران</label><input id="rules" value="I" maxlength="1"></div>
+      <div class="full"><label><span class="n">10</span>المعدات</label><input id="equip" value="SDFGHLVY/S"></div>
+      <div><label>اللون A/</label><input id="colour" value="WHITE"></div>
+      <div><label>Originator</label><input id="orig" placeholder="—"></div>
+    </div>
+  </details>
+
+  <section>
+    <h2>رسالة FPL <small>للتحقق قبل الإرسال</small></h2>
+    <pre id="msg"></pre>
+    <div class="row" style="padding:0 14px 12px"><button type="button" id="copyBtn">نسخ النص</button><button type="button" id="waTxtBtn">إرسال النص فقط على واتساب</button></div>
+    <ul class="errs" id="errs"></ul>
+  </section>
+</div>
+
+<div class="bar"><div class="in">
+  <button class="primary" id="pdfBtn">حفظ PDF</button>
+  <button class="wa" id="waBtn">مشاركة واتساب</button>
+</div></div>
+<div class="toast" id="toast" role="status"></div>
+<div class="modal" id="cfm" role="dialog" aria-modal="true" aria-labelledby="cfmT" hidden>
+  <div class="mbox"><h3 id="cfmT">تنبيه</h3><div id="cfmM"></div>
+  <div class="row"><button type="button" id="cfmNo">رجوع</button><button type="button" class="primary" id="cfmYes">متابعة</button></div></div>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+const F=['acid','dof','dep','eobt','dest','eet','altn','altn2','spd','lvl','route','endur','pob','other','remarks','pic','dname','lic','reg','type','wtc','rules','equip','colour','orig'];
+const store={get(k){try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+function toast(t){const e=$('toast');e.textContent=t;e.classList.add('on');clearTimeout(e._t);e._t=setTimeout(()=>e.classList.remove('on'),2200)}
+const U=v=>(v||'').toUpperCase().replace(/\s+/g,' ').trim();
+const pad=(n,l)=>String(n).padStart(l,'0');
+
+// defaults: today UTC
+(function init(){
+  const d=new Date();$('dof').value=d.toISOString().slice(0,10);
+  const last=store.get('fpl_last');
+  if(last){F.forEach(k=>{if(last[k]!==undefined&&k!=='dof')$(k).value=last[k]})}
+  const p=store.get('fpl_fd');if(p){['dname','lic'].forEach(k=>{if(p[k])$(k).value=p[k]})}
+})();
+
+let tof=(store.get('fpl_tof')||'X');
+function setTof(x){tof=x;store.set('fpl_tof',x);document.querySelectorAll('#tofSeg button').forEach(b=>b.setAttribute('aria-checked',b.dataset.v===x?'true':'false'))}
+const XDEF={radio:['U'],surv:['P','D','J'],jack:['U','V']};
+let xst=store.get('fpl_x')||XDEF;
+function grp(g){const o={any:false,s:''};document.querySelectorAll('.xb[data-g="'+g+'"]').forEach(b=>{const v=b.dataset.v;if(!(xst[g]||[]).includes(v)){o[v]=1;o.any=true;o.s+=v}});return o}
+function syncX(){document.querySelectorAll('.xb').forEach(b=>b.setAttribute('aria-pressed',(xst[b.dataset.g]||[]).includes(b.dataset.v)?'true':'false'))}
+function vals(){const o={};F.forEach(k=>o[k]=k==='dof'?$(k).value:U($(k).value));o.rules=(o.rules||'')[0]||'';o.addr=(typeof finalAddrs==='function'?finalAddrs(o):[]).map(x=>x.a).join(' ');o.tof=tof;o.radio=grp('radio');o.surv=grp('surv');o.jack=grp('jack');return o}
+function hhmm(s){return /^([01]\d|2[0-3])[0-5]\d$/.test(s)}
+function dur(s){return /^\d{2}[0-5]\d$/.test(s)}
+function addMin(a,b){const m=(+a.slice(0,2)*60+ +a.slice(2))+(+b.slice(0,2)*60+ +b.slice(2));const dd=Math.floor(m/1440);const r=m%1440;return pad(Math.floor(r/60),2)+pad(r%60,2)+'Z'+(dd?' (+'+dd+')':'')}
+function icao(s){return /^[A-Z]{4}$/.test(s)}
+
+function build(){
+  const v=vals();const errs=[];const bad=new Set();
+  if(!/^[A-Z]{3}[0-9A-Z]{1,4}$/.test(v.acid)){errs.push('رقم الرحلة غير صحيح (مثال LXX340)');bad.add('acid')}
+  if(!v.dof){errs.push('اختر تاريخ الرحلة');bad.add('dof')}
+  if(!icao(v.dep)){errs.push('كود مطار الإقلاع يجب أن يكون 4 حروف');bad.add('dep')}
+  if(!icao(v.dest)){errs.push('كود مطار الوصول يجب أن يكون 4 حروف');bad.add('dest')}
+  if(v.altn&&!icao(v.altn)){errs.push('كود البديل غير صحيح');bad.add('altn')}
+  if(v.altn2&&!icao(v.altn2)){errs.push('كود البديل الثاني غير صحيح');bad.add('altn2')}
+  if(!hhmm(v.eobt)){errs.push('وقت الإقلاع بصيغة HHMM (0000–2359)');bad.add('eobt')}
+  if(!dur(v.eet)){errs.push('مدة الطيران بصيغة HHMM');bad.add('eet')}
+  if(!dur(v.endur)){errs.push('الوقود (Endurance) بصيغة HHMM');bad.add('endur')}
+  if(!/^\d{1,4}$/.test(v.spd)){errs.push('السرعة أرقام فقط');bad.add('spd')}
+  if(!/^\d{3}$/.test(v.lvl)){errs.push('الارتفاع 3 أرقام (مثال 190)');bad.add('lvl')}
+  if(!/^\d{1,3}$/.test(v.pob)&&v.pob!=='TBN'){errs.push('عدد الأشخاص رقم أو TBN');bad.add('pob')}
+  if(!v.route){errs.push('أدخل المسار');bad.add('route')}
+  if(dur(v.eet)&&dur(v.endur)&&(+v.endur.slice(0,2)*60+ +v.endur.slice(2))<=(+v.eet.slice(0,2)*60+ +v.eet.slice(2))){errs.push('الوقود أقل من أو يساوي مدة الطيران');bad.add('endur')}
+  if(!v.pic){errs.push('أدخل اسم قائد الرحلة');bad.add('pic')}
+  if(!/^[IVYZ]$/.test(v.rules)){errs.push('قواعد الطيران حرف واحد: I أو V أو Y أو Z');bad.add('rules')}
+  F.forEach(k=>$(k).classList.toggle('bad',bad.has(k)));
+
+  const dof=v.dof?v.dof.slice(2).replace(/-/g,''):'';
+  const f15='N'+pad(v.spd,4)+'F'+v.lvl+' '+v.route;
+  const f16=v.dest+v.eet+(v.altn?' '+v.altn:'')+(v.altn2?' '+v.altn2:'');
+  const f18=['DOF/'+dof,'REG/'+v.reg,v.other].filter(Boolean).join(' ');
+  const f19=['E/'+v.endur,'P/'+(v.pob==='TBN'?'TBN':pad(v.pob,3)),v.radio.any?'R/'+v.radio.s:'',v.surv.any?'S/'+v.surv.s:'',v.jack.any?'J/'+v.jack.s:'',v.colour?'A/'+v.colour:'',v.remarks?'N/'+v.remarks:'',v.pic?'C/'+v.pic:''].filter(Boolean).join(' ');
+  const msg='(FPL-'+v.acid+'-'+v.rules+v.tof+'\n-'+v.type+'/'+v.wtc+'-'+v.equip+'\n-'+v.dep+v.eobt+'\n-'+f15+'\n-'+f16+'\n-'+f18+'\n-'+f19+')';
+  const eta=hhmm(v.eobt)&&dur(v.eet)?addMin(v.eobt,v.eet):'—';
+
+  $('msg').textContent=msg;
+  $('errs').innerHTML='';errs.forEach(e=>{const li=document.createElement('li');li.textContent=e;$('errs').appendChild(li)});
+  $('sCs').textContent=v.acid||'—';$('sRt').textContent=(v.dep||'????')+' → '+(v.dest||'????');
+  $('sReg').textContent=v.reg+' · '+v.type+' · DOF '+dof;$('sOff').textContent='EOBT '+(v.eobt||'—')+'Z';$('sEta').textContent='ETA '+eta;
+  store.set('fpl_last',v);
+  return {v,errs,msg,dof,f15,f16,f18,eta};
+}
+
+F.forEach(k=>$(k).addEventListener('input',build));
+let lastPob='19';function syncTbn(){const on=U($('pob').value)==='TBN';$('tbnBtn').setAttribute('aria-pressed',on);$('pob').readOnly=on}
+$('tbnBtn').onclick=()=>{if(U($('pob').value)==='TBN'){$('pob').value=lastPob}else{lastPob=$('pob').value||'';$('pob').value='TBN'}syncTbn();build()};$('pob').addEventListener('input',syncTbn);syncTbn();document.querySelectorAll('#tofSeg button').forEach(b=>b.onclick=()=>{setTof(b.dataset.v);build()});setTof(tof);syncX();document.querySelectorAll('.xb').forEach(b=>b.onclick=()=>{const g=b.dataset.g,v=b.dataset.v;const a=new Set(xst[g]||[]);a.has(v)?a.delete(v):a.add(v);xst={...xst,[g]:[...a]};store.set('fpl_x',xst);syncX();build()});
+
+// ===== address directory =====
+const DIR_DEF={'*':{name:'أساسية لكل رحلة',a:[['HLLBZQZX',1],['HLLLZQZX',1]]},
+ HLLM:{name:'معيتيقة',a:[['HLLMZPZX',1],['HLLMZTZX',1]]},
+ HLLS:{name:'سبها',a:[['HLLSZTZX',1]]},
+ HLUB:{name:'أوباري',a:[['HLUBZTZX',0]]},
+ HLGT:{name:'غات',a:[]},
+ DTTA:{name:'تونس قرطاج',a:[['DTTCZQZX',1],['DTTCZRZX',1],['DTTAZPZX',0],['DTTAZTZX',0]]}};
+let dir=store.get('fpl_dir')||JSON.parse(JSON.stringify(DIR_DEF));
+let ax=store.get('fpl_addrx')||{rm:[],add:[]};
+const saveDir=()=>store.set('fpl_dir',dir),saveAx=()=>store.set('fpl_addrx',ax);
+const apName=c=>(dir[c]&&dir[c].name)||'';
+function finalAddrs(v){
+  v=v||{dep:U($('dep').value),dest:U($('dest').value),altn:U($('altn').value),altn2:U($('altn2').value)};
+  const out=[],seen=new Set();const push=(a,ok,src)=>{if(seen.has(a))return;seen.add(a);out.push({a,ok,src})};
+  const ent=c=>(dir[c]&&dir[c].a)||[];
+  ent(v.dep).filter(x=>x[0].slice(4,6)==='ZP').forEach(x=>push(x[0],x[1],v.dep));
+  ent('*').forEach(x=>push(x[0],x[1],'أساسي'));
+  ent(v.dep).forEach(x=>push(x[0],x[1],v.dep));
+  [[v.dest,'وصول'],[v.altn,'بديل'],[v.altn2,'بديل 2']].forEach(([c,l])=>{if(c)ent(c).forEach(x=>push(x[0],x[1],c+' '+l))});
+  const res=out.filter(x=>!ax.rm.includes(x.a));
+  ax.add.forEach(a=>{if(!seen.has(a)){seen.add(a);res.push({a,ok:1,src:'يدوي',mn:1})}});
+  return res;
+}
+function renderChips(){
+  const list=finalAddrs(),box=$('chips');box.innerHTML='';
+  list.forEach(x=>{const c=document.createElement('span');c.className='chip'+(x.mn?' mn':(x.ok?'':' uc'));c.setAttribute('role','listitem');
+    const t=document.createElement('span');t.textContent=x.a;const sm=document.createElement('small');sm.textContent=x.src;
+    const b=document.createElement('button');b.type='button';b.textContent='×';b.setAttribute('aria-label','حذف '+x.a);
+    b.onclick=()=>{if(x.mn)ax.add=ax.add.filter(a=>a!==x.a);else ax.rm.push(x.a);saveAx();refresh()};
+    c.append(t,sm,b);box.appendChild(c)});
+  const n=list.length;$('addrCount').textContent=n+' عنوان'+(n>17?' — الحد في النموذج 17':'');
+}
+$('addAddrBtn').onclick=()=>{const a=U($('addAddr').value).replace(/\s/g,'');if(!/^[A-Z]{8}$/.test(a)){toast('العنوان 8 حروف إنجليزية');return}
+  ax.rm=ax.rm.filter(x=>x!==a);if(!finalAddrs().some(x=>x.a===a))ax.add.push(a);saveAx();$('addAddr').value='';refresh()};
+$('resetAddr').onclick=()=>{ax={rm:[],add:[]};saveAx();refresh();toast('رجعت العناوين للوضع التلقائي')};
+function renderDir(){
+  const L=$('dirList');L.innerHTML='';
+  Object.keys(dir).sort((a,b)=>a==='*'?-1:b==='*'?1:a.localeCompare(b)).forEach(code=>{
+    const e=dir[code],d=document.createElement('div');d.className='ap';
+    const h=document.createElement('h4');const ti=document.createElement('div');
+    const cs=document.createElement('span');cs.textContent=code==='*'?'':code;const nm=document.createTextNode((code==='*'?'':'  ')+e.name);ti.append(cs,nm);h.appendChild(ti);
+    if(code!=='*'){const del=document.createElement('button');del.type='button';del.textContent='حذف المطار';del.onclick=async()=>{if(await askConfirm('حذف <b>'+code+'</b> وكل عناوينه من الدليل؟','حذف','إلغاء')){delete dir[code];saveDir();refresh()}};h.appendChild(del)}
+    const ch=document.createElement('div');ch.className='chips';
+    e.a.forEach((x,i)=>{const c=document.createElement('span');c.className='chip'+(x[1]?'':' uc');c.title='اضغط لتبديل التأكيد';
+      const t=document.createElement('span');t.textContent=x[0];const sm=document.createElement('small');sm.textContent=x[1]?'مؤكد':'غير مؤكد';
+      const b=document.createElement('button');b.type='button';b.textContent='×';b.setAttribute('aria-label','حذف '+x[0]);
+      b.onclick=ev=>{ev.stopPropagation();e.a.splice(i,1);saveDir();refresh()};
+      c.onclick=()=>{x[1]=x[1]?0:1;saveDir();refresh()};c.append(t,sm,b);ch.appendChild(c)});
+    if(!e.a.length){const em=document.createElement('div');em.className='rempty';em.textContent='لا توجد عناوين — لن يُضاف شيء لهذا المطار';ch.appendChild(em)}
+    const ar=document.createElement('div');ar.className='arow';const inp=document.createElement('input');inp.maxLength=8;inp.placeholder='عنوان جديد (مثال '+(code==='*'?'HLLLZQZX':code+'ZTZX')+')';
+    const ad=document.createElement('button');ad.type='button';ad.textContent='إضافة';
+    ad.onclick=()=>{const a=U(inp.value).replace(/\s/g,'');if(!/^[A-Z]{8}$/.test(a)){toast('العنوان 8 حروف إنجليزية');return}if(!e.a.some(x=>x[0]===a))e.a.push([a,0]);saveDir();refresh()};
+    ar.append(inp,ad);d.append(h,ch,ar);L.appendChild(d)});
+}
+$('newApBtn').onclick=()=>{const c=U($('newCode').value),n=$('newName').value.trim();if(!icao(c)){toast('كود ICAO من 4 حروف');return}
+  if(dir[c]){toast(c+' موجود في الدليل');return}dir[c]={name:n||c,a:[]};saveDir();$('newCode').value='';$('newName').value='';refresh();toast('أُضيف '+c+'، أضف عناوينه الآن')};
+
+// ===== routes library =====
+const RT_DEF={"HLLM-HLLS":{route:"IZD2D IZD V800 WANIN DCT AGAAR DCT SEB DCT",spd:"292",lvl:"190",eet:"0127",altn:"HLGT",altn2:""}};
+function routes(){return store.get('fpl_routes')||RT_DEF}
+function renderRoutes(){
+  const r=routes(),q=(($('rq').value||'').toUpperCase()).replace(/[^A-Z\u0600-\u06FF]/g,'');
+  const cur=U($('dep').value)+'-'+U($('dest').value);
+  const keys=Object.keys(r).sort().filter(k=>{const[a,b]=k.split('-');return !q||(a+b+apName(a)+apName(b)).replace(/\s/g,'').toUpperCase().includes(q)});
+  const box=$('rres');box.innerHTML='';
+  if(!Object.keys(r).length){box.innerHTML='<div class="rempty">لا توجد مسارات محفوظة بعد.</div>';return}
+  if(!keys.length){box.innerHTML='<div class="rempty">لا يوجد مسار مطابق. اكتب المطارين والمسار ثم اضغط "حفظ المسار".</div>';return}
+  keys.forEach(k=>{const[a,b]=k.split('-'),x=r[k];const c=document.createElement('div');c.className='rc'+(k===cur?' cur':'');c.setAttribute('role','listitem');c.tabIndex=0;
+    const pr=document.createElement('div');pr.className='pr';pr.textContent=a+' → '+b;
+    const nm=document.createElement('div');nm.className='nm';nm.textContent=[apName(a),apName(b)].filter(Boolean).join(' ← ');
+    const del=document.createElement('button');del.type='button';del.className='del';del.textContent='حذف';
+    del.onclick=async ev=>{ev.stopPropagation();if(await askConfirm('حذف المسار <b>'+a+' → '+b+'</b>؟','حذف','إلغاء')){const all=routes();delete all[k];store.set('fpl_routes',all);renderRoutes();toast('تم حذف المسار')}};
+    const meta=document.createElement('div');meta.className='meta';meta.textContent='N'+pad(x.spd,4)+'  F'+x.lvl+'  EET '+x.eet+(x.altn?'  ALTN '+x.altn:'')+(x.altn2?' '+x.altn2:'');
+    const rt=document.createElement('div');rt.className='rt2';rt.textContent=x.route;
+    c.append(pr,del,nm,meta,rt);
+    const load=()=>{$('dep').value=a;$('dest').value=b;['route','spd','lvl','eet','altn','altn2'].forEach(f=>$(f).value=x[f]||'');$('rq').value='';refresh();toast('تم تحميل '+a+' → '+b+'، عدّل ما تريد');$('route').scrollIntoView({behavior:'smooth',block:'center'})};
+    c.onclick=load;c.onkeydown=e=>{if(e.key==='Enter')load()};box.appendChild(c)});
+}
+function syncSaveBtn(){const k=U($('dep').value)+'-'+U($('dest').value);const ex=!!routes()[k];$('saveRoute').textContent=(ex?'تحديث المسار المحفوظ ':'حفظ المسار ')+k.replace('-',' → ')}
+$('rq').addEventListener('input',renderRoutes);
+$('saveRoute').onclick=async()=>{const v=vals();if(!icao(v.dep)||!icao(v.dest)||!v.route){toast('أكمل المطارين والمسار أولاً');return}
+  const r=routes(),k=v.dep+'-'+v.dest;
+  if(r[k]&&r[k].route!==v.route){if(!(await askConfirm('يوجد مسار محفوظ لـ <b>'+v.dep+' → '+v.dest+'</b>. استبداله بالمسار الحالي؟','تحديث','إلغاء')))return}
+  r[k]={route:v.route,spd:v.spd,lvl:v.lvl,eet:v.eet,altn:v.altn,altn2:v.altn2};store.set('fpl_routes',r);refresh();toast('تم حفظ '+v.dep+' → '+v.dest)};
+function refresh(){renderChips();renderDir();renderRoutes();syncSaveBtn();build()}
+['dep','dest','altn','altn2'].forEach(k=>$(k).addEventListener('input',()=>{renderChips();renderRoutes();syncSaveBtn()}));
+$('savePic').onclick=()=>{const v=vals();store.set('fpl_fd',{dname:v.dname,lic:v.lic});toast('تم حفظ بيانات المُرحِّل على هذا الجهاز')};
+
+// signature pad
+const cv=$('pad'),cx=cv.getContext('2d');let drawing=false,sigUsed=false,last=null;
+function sizePad(){const r=cv.getBoundingClientRect(),dpr=window.devicePixelRatio||1;const img=sigUsed?cv.toDataURL():null;cv.width=r.width*dpr;cv.height=r.height*dpr;cx.setTransform(dpr,0,0,dpr,0,0);cx.lineWidth=2.2;cx.lineCap='round';cx.lineJoin='round';cx.strokeStyle='#0B2A6B';if(img){const i=new Image();i.onload=()=>cx.drawImage(i,0,0,r.width,r.height);i.src=img}}
+sizePad();window.addEventListener('resize',sizePad);
+const pt=e=>{const r=cv.getBoundingClientRect();return{x:e.clientX-r.left,y:e.clientY-r.top}};
+cv.addEventListener('pointerdown',e=>{drawing=true;last=pt(e);cv.setPointerCapture(e.pointerId)});
+cv.addEventListener('pointermove',e=>{if(!drawing)return;const p=pt(e);cx.beginPath();cx.moveTo(last.x,last.y);cx.lineTo(p.x,p.y);cx.stroke();last=p;if(!sigUsed){sigUsed=true;build()}});
+['pointerup','pointercancel','pointerleave'].forEach(t=>cv.addEventListener(t,()=>drawing=false));
+$('clearSig').onclick=()=>{cx.clearRect(0,0,cv.width,cv.height);sigUsed=false;build()};
+
+// PDF — exact ICAO form layout
+const FORM={"r":[[36.2,76.8,517.5,691.5,"g"],[36.6,77.1,516.8,690.8,"s"],[37.0,196.8,516.0,0.8,"k"],[134.5,91.8,418.5,0.8,"k"],[134.5,107.5,418.5,0.8,"k"],[134.5,91.8,0.8,16.5,"k"],[134.5,122.5,418.5,0.8,"k"],[134.5,107.5,0.8,15.8,"k"],[134.5,137.5,382.5,0.8,"k"],[516.2,122.5,0.8,15.8,"k"],[134.5,122.5,0.8,15.8,"k"],[48.6,152.9,85.5,15.8,"s"],[65.5,164.5,0.8,3.8,"k"],[82.8,153.2,0.8,15.0,"k"],[100.0,164.5,0.8,3.8,"k"],[116.5,164.5,0.8,3.8,"k"],[146.9,152.9,115.5,15.8,"s"],[161.5,164.5,0.8,3.8,"k"],[175.8,164.5,0.8,3.8,"k"],[190.0,164.5,0.8,3.8,"k"],[204.2,164.5,0.8,3.8,"k"],[218.5,164.5,0.8,3.8,"k"],[233.5,164.5,0.8,3.8,"k"],[247.8,164.5,0.8,3.8,"k"],[37.0,182.5,516.0,0.8,"k"],[190.8,212.5,105.0,16.5,"w"],[191.1,212.9,104.2,15.8,"s"],[205.8,224.5,0.8,3.8,"k"],[220.8,224.5,0.8,3.8,"k"],[235.8,224.5,0.8,3.8,"k"],[250.0,224.5,0.8,3.8,"k"],[265.0,224.5,0.8,3.8,"k"],[280.0,224.5,0.8,3.8,"k"],[408.2,212.5,16.5,16.5,"w"],[408.6,212.9,15.8,15.8,"s"],[505.8,212.5,16.5,16.5,"w"],[506.1,212.9,15.8,15.8,"s"],[59.5,246.2,30.0,16.5,"w"],[59.9,246.6,29.2,15.8,"s"],[73.8,258.2,0.8,3.8,"k"],[153.2,246.2,63.8,16.5,"w"],[153.6,246.6,63.0,15.8,"s"],[169.0,258.2,0.8,3.8,"k"],[184.8,258.2,0.8,3.8,"k"],[200.5,258.2,0.8,3.8,"k"],[277.0,246.2,16.5,16.5,"w"],[277.4,246.6,15.8,15.8,"s"],[382.0,246.2,142.5,16.5,"w"],[382.4,246.6,141.8,15.8,"s"],[97.0,274.0,60.0,16.5,"w"],[97.4,274.4,59.2,15.8,"s"],[112.0,286.0,0.8,3.8,"k"],[126.2,286.0,0.8,3.8,"k"],[141.2,286.0,0.8,3.8,"k"],[235.8,274.0,60.0,16.5,"w"],[236.1,274.4,59.2,15.8,"s"],[250.8,286.0,0.8,3.8,"k"],[265.0,286.0,0.8,3.8,"k"],[280.0,286.0,0.8,3.8,"k"],[59.5,302.5,67.5,16.5,"w"],[59.9,302.9,66.8,15.8,"s"],[73.0,314.5,0.8,3.8,"k"],[86.5,314.5,0.8,3.8,"k"],[99.2,314.5,0.8,3.8,"k"],[112.8,314.5,0.8,3.8,"k"],[142.0,302.5,75.0,16.5,"w"],[142.4,302.9,74.2,15.8,"s"],[157.0,314.5,0.8,3.8,"k"],[172.0,314.5,0.8,3.8,"k"],[186.2,314.5,0.8,3.8,"k"],[201.2,314.5,0.8,3.8,"k"],[235.8,302.5,317.2,17.2,"w"],[235.8,302.5,317.2,0.8,"k"],[235.8,302.5,0.8,17.2,"k"],[37.0,317.5,516.0,15.0,"w"],[37.0,317.5,516.0,0.8,"k"],[37.0,332.5,516.0,15.0,"w"],[37.0,332.5,516.0,0.8,"k"],[37.0,347.5,516.0,15.0,"w"],[37.0,347.5,516.0,0.8,"k"],[37.0,361.7,516.0,0.8,"k"],[37.0,362.5,480.0,15.0,"w"],[37.0,376.7,480.0,0.8,"k"],[516.2,362.5,0.8,15.0,"k"],[97.0,400.0,60.0,16.5,"w"],[97.4,400.4,59.2,15.8,"s"],[112.0,412.0,0.8,3.8,"k"],[126.2,412.0,0.8,3.8,"k"],[141.2,412.0,0.8,3.8,"k"],[236.5,400.0,52.5,16.5,"w"],[236.9,400.4,51.8,15.8,"s"],[249.2,412.0,0.8,3.8,"k"],[262.0,400.7,0.8,15.0,"k"],[274.8,412.0,0.8,3.8,"k"],[352.8,400.0,60.0,16.5,"w"],[353.1,400.4,59.2,15.8,"s"],[367.8,412.0,0.8,3.8,"k"],[382.0,412.0,0.8,3.8,"k"],[397.0,412.0,0.8,3.8,"k"],[465.2,400.0,60.0,16.5,"w"],[465.6,400.4,59.2,15.8,"s"],[480.2,412.0,0.8,3.8,"k"],[494.5,412.0,0.8,3.8,"k"],[509.5,412.0,0.8,3.8,"k"],[59.5,431.5,493.5,15.0,"w"],[59.5,431.5,493.5,0.8,"k"],[59.5,431.5,0.8,15.0,"k"],[37.0,446.5,516.0,15.0,"w"],[37.0,446.5,516.0,0.8,"k"],[37.0,461.5,516.0,15.0,"w"],[37.0,461.5,516.0,0.8,"k"],[37.0,475.7,516.0,0.8,"k"],[37.0,476.5,480.0,15.0,"w"],[37.0,490.7,480.0,0.8,"k"],[516.2,476.5,0.8,15.0,"k"],[89.5,529.0,52.5,16.5,"w"],[89.9,529.4,51.8,15.8,"s"],[102.2,541.0,0.8,3.8,"k"],[115.0,529.8,0.8,15.0,"k"],[127.8,541.0,0.8,3.8,"k"],[217.0,529.0,45.0,16.5,"w"],[217.4,529.4,44.2,15.8,"s"],[232.0,541.0,0.8,3.8,"k"],[246.2,541.0,0.8,3.8,"k"],[412.0,529.0,16.5,16.5,"w"],[412.4,529.4,15.8,15.8,"s"],[457.0,529.0,16.5,16.5,"w"],[457.4,529.4,15.8,15.8,"s"],[500.5,529.0,16.5,16.5,"w"],[500.9,529.4,15.8,15.8,"s"],[89.5,568.0,16.5,16.5,"w"],[89.9,568.4,15.8,15.8,"s"],[128.5,568.0,16.5,16.5,"w"],[128.9,568.4,15.8,15.8,"s"],[169.8,568.0,16.5,16.5,"w"],[170.1,568.4,15.8,15.8,"s"],[211.0,568.0,16.5,16.5,"w"],[211.4,568.4,15.8,15.8,"s"],[254.5,568.0,16.5,16.5,"w"],[254.9,568.4,15.8,15.8,"s"],[331.0,568.0,16.5,16.5,"w"],[331.4,568.4,15.8,15.8,"s"],[369.2,568.0,16.5,16.5,"w"],[369.6,568.4,15.8,15.8,"s"],[412.0,568.0,16.5,16.5,"w"],[412.4,568.4,15.8,15.8,"s"],[457.0,568.0,16.5,16.5,"w"],[457.4,568.4,15.8,15.8,"s"],[500.5,568.0,16.5,16.5,"w"],[500.9,568.4,15.8,15.8,"s"],[55.8,609.2,16.5,16.5,"w"],[56.1,609.6,15.8,15.8,"s"],[89.5,609.2,26.2,16.5,"w"],[89.9,609.6,25.5,15.8,"s"],[102.2,621.2,0.8,3.8,"k"],[130.8,609.2,37.5,16.5,"w"],[131.1,609.6,36.8,15.8,"s"],[142.8,621.2,0.8,3.8,"k"],[154.8,621.2,0.8,3.8,"k"],[187.0,609.2,16.5,16.5,"w"],[187.4,609.6,15.8,15.8,"s"],[220.8,609.2,135.0,15.0,"w"],[221.1,609.6,134.2,14.2,"s"],[89.5,635.5,463.5,15.0,"w"],[89.5,635.5,463.5,0.8,"k"],[89.5,649.8,463.5,0.8,"k"],[89.5,635.5,0.8,15.0,"k"],[55.8,661.8,16.5,16.5,"w"],[56.1,662.1,15.8,15.8,"s"],[89.5,661.8,427.5,15.0,"w"],[89.9,662.1,426.8,14.2,"s"],[89.5,688.0,255.0,15.0,"w"],[89.9,688.4,254.2,14.2,"s"],[37.0,720.2,154.5,47.3,"w"],[37.0,720.2,154.5,0.8,"k"],[190.8,720.2,0.8,47.3,"k"],[191.5,720.2,361.5,0.8,"k"]],"w":[[224.6,49.2,15.0,"helvetica-bold","ICAO"],[266.2,49.2,15.0,"helvetica-bold","FLIGHT"],[324.6,49.2,15.0,"helvetica-bold","PLAN"],[48.2,82.5,6.0,"helvetica-normal","PRIORITY"],[134.5,84.0,6.0,"helvetica-normal","ADDRESSEE(S)"],[49.1,94.3,12.0,"helvetica-bold","<<"],[63.1,98.1,7.5,"menu",""],[70.8,93.9,13.5,"helvetica-bold","FF"],[113.9,94.3,15.0,"arrow",""],[521.4,124.6,12.0,"courier-bold","<<"],[535.8,127.4,7.5,"menu",""],[77.5,146.3,6.0,"helvetica-normal","FILING"],[98.4,146.3,6.0,"helvetica-normal","TIME"],[187.0,146.3,6.0,"helvetica-normal","ORIGINATOR"],[134.5,154.3,15.0,"arrow",""],[271.1,154.3,12.0,"helvetica-bold","<<"],[285.1,158.1,7.5,"menu",""],[62.8,176.3,6.0,"helvetica-normal","SPECIFIC"],[92.1,176.3,6.0,"helvetica-normal","IDENTIFICATION"],[141.0,176.3,6.0,"helvetica-normal","OF"],[150.7,176.3,6.0,"helvetica-normal","ADDRESSEE(S)"],[197.0,176.3,6.0,"helvetica-normal","AND"],[211.4,176.3,6.0,"helvetica-normal","(OR)"],[226.0,176.3,6.0,"helvetica-normal","ORIGINATOR"],[48.2,206.3,6.0,"helvetica-bold","3"],[53.3,206.3,6.0,"helvetica-normal","MESSAGE"],[84.5,206.3,6.0,"helvetica-normal","TYPE"],[190.8,199.8,7.5,"helvetica-bold","7"],[196.6,199.8,7.5,"helvetica-normal","AIRCRAFT"],[236.0,199.8,7.5,"helvetica-normal","IDENTIFICATION"],[385.8,199.8,7.5,"helvetica-bold","8"],[392.0,199.8,7.5,"helvetica-normal","FLIGHT"],[420.6,199.8,7.5,"helvetica-normal","RULES"],[479.5,199.8,7.5,"helvetica-normal","TYPE"],[501.2,199.8,7.5,"helvetica-normal","OF"],[513.7,199.8,7.5,"helvetica-normal","FLIGHT"],[54.6,214.6,12.0,"courier-bold","<<"],[69.0,217.4,7.5,"menu",""],[78.2,213.9,13.5,"helvetica-bold","(FPL"],[179.8,216.9,12.0,"dash",""],[397.3,216.9,12.0,"dash",""],[527.4,214.6,12.0,"courier-bold","<<"],[541.8,217.4,7.5,"menu",""],[55.8,238.8,7.5,"helvetica-bold","9"],[239.5,233.6,7.5,"helvetica-normal","WAKE"],[263.3,233.6,7.5,"helvetica-normal","TURBULENCE"],[316.2,233.6,7.5,"helvetica-normal","CAT"],[62.0,238.8,7.5,"helvetica-normal","NUMBER"],[149.5,238.8,7.5,"helvetica-normal","TYPE"],[171.2,238.8,7.5,"helvetica-normal","OF"],[183.3,238.8,7.5,"helvetica-normal","AIRCRAFT"],[389.5,238.8,7.5,"helvetica-bold","10"],[399.9,238.8,7.5,"helvetica-normal","EQUIPMENT"],[48.5,250.6,12.0,"dash",""],[262.0,247.6,12.0,"courier-bold","/"],[371.0,250.6,12.0,"dash",""],[528.9,248.4,12.0,"courier-bold","<<"],[543.3,251.1,7.5,"menu",""],[78.2,265.8,7.5,"helvetica-bold","13"],[88.7,265.8,7.5,"helvetica-normal","DEPARTURE"],[135.9,265.8,7.5,"helvetica-normal","AERODROME"],[258.2,265.8,7.5,"helvetica-normal","TIME"],[85.1,277.3,13.5,"dash",""],[315.2,276.1,12.0,"courier-bold","<<"],[329.6,278.9,7.5,"menu",""],[59.5,295.1,7.5,"helvetica-bold","15"],[69.9,295.1,7.5,"helvetica-normal","CRUISING"],[108.7,295.1,7.5,"helvetica-normal","SPEED"],[168.2,295.1,7.5,"helvetica-normal","LEVEL"],[235.8,295.1,7.5,"helvetica-normal","ROUTE"],[48.5,306.1,12.0,"dash",""],[217.0,303.6,15.0,"arrow",""],[527.4,364.6,12.0,"courier-bold","<<"],[541.8,367.4,7.5,"menu",""],[239.5,381.3,7.5,"helvetica-normal","TOTAL"],[264.8,381.3,7.5,"helvetica-normal","EET"],[74.5,392.6,7.5,"helvetica-bold","16"],[84.9,392.6,7.5,"helvetica-normal","DESTINATION"],[136.5,392.6,7.5,"helvetica-normal","AERODROME"],[250.8,392.6,7.5,"helvetica-normal","HR"],[263.7,392.6,7.5,"helvetica-normal","MIN"],[348.2,392.6,7.5,"helvetica-normal","ALTN"],[368.5,392.6,7.5,"helvetica-normal","AERODROME"],[453.2,392.6,7.5,"helvetica-normal","2ND"],[469.9,392.6,7.5,"helvetica-normal","ALTN"],[490.2,392.6,7.5,"helvetica-normal","AERODROME"],[86.0,403.6,12.0,"dash",""],[337.8,401.1,15.0,"arrow",""],[450.2,401.1,15.0,"arrow",""],[529.7,402.1,12.0,"courier-bold","<<"],[544.1,404.9,7.5,"menu",""],[59.5,424.1,7.5,"helvetica-bold","18"],[69.9,424.1,7.5,"helvetica-normal","OTHER"],[98.3,424.1,7.5,"helvetica-normal","INFORMATION"],[48.5,433.6,12.0,"dash",""],[517.0,477.9,12.0,"courier-bold",")"],[529.3,478.6,12.0,"courier-bold","<<"],[543.7,481.4,7.5,"menu",""],[149.4,496.1,7.5,"helvetica-normal","SUPPLEMENTARY"],[216.9,496.1,7.5,"helvetica-normal","INFORMATION"],[271.0,496.1,7.5,"helvetica-normal","(NOT"],[291.1,496.1,7.5,"helvetica-normal","TO"],[303.5,496.1,7.5,"helvetica-normal","BE"],[315.4,496.1,7.5,"helvetica-normal","TRANSMITTED"],[370.8,496.1,7.5,"helvetica-normal","IN"],[380.4,496.1,7.5,"helvetica-normal","FPL"],[396.0,496.1,7.5,"helvetica-normal","MESSAGES)"],[78.2,512.3,6.0,"helvetica-bold","19"],[90.8,511.1,7.5,"helvetica-normal","ENDURANCE"],[438.2,511.1,7.5,"helvetica-normal","EMERGENCY"],[488.5,511.1,7.5,"helvetica-normal","RADIO"],[103.8,522.3,7.5,"helvetica-normal","HR"],[116.7,522.3,7.5,"helvetica-normal","MIN"],[202.0,522.3,7.5,"helvetica-normal","PERSONS"],[240.8,522.3,7.5,"helvetica-normal","ON"],[254.1,522.3,7.5,"helvetica-normal","BOARD"],[413.5,522.3,7.5,"helvetica-normal","UHF"],[458.5,522.3,7.5,"helvetica-normal","VHF"],[502.0,522.3,7.5,"helvetica-normal","ELT"],[48.3,532.7,10.5,"dash",""],[63.0,531.5,12.0,"helvetica-bold","E"],[80.3,531.5,12.0,"helvetica-bold","/"],[172.0,530.8,15.0,"arrow",""],[190.5,531.5,12.0,"helvetica-bold","P"],[207.8,531.5,12.0,"helvetica-bold","/"],[374.5,530.8,15.0,"arrow",""],[388.9,531.5,12.0,"helvetica-bold","R"],[402.8,531.5,12.0,"helvetica-bold","/"],[415.8,531.5,12.0,"helvetica-bold","U"],[461.2,531.5,12.0,"helvetica-bold","V"],[504.7,531.5,12.0,"helvetica-bold","E"],[89.5,549.3,7.5,"helvetica-normal","SURVIVAL"],[127.7,549.3,7.5,"helvetica-normal","EQUIPMENT"],[125.5,560.6,7.5,"helvetica-normal","POLAR"],[164.5,560.6,7.5,"helvetica-normal","DESERT"],[202.0,560.6,7.5,"helvetica-normal","MARITIME"],[247.0,560.6,7.5,"helvetica-normal","JUNGLE"],[322.0,560.6,7.5,"helvetica-normal","JACKETS"],[367.0,560.6,7.5,"helvetica-normal","LIGHT"],[403.0,560.6,7.5,"helvetica-normal","FLUORES"],[458.5,560.6,7.5,"helvetica-normal","UHF"],[502.0,560.6,7.5,"helvetica-normal","VHF"],[74.5,569.8,15.0,"arrow",""],[93.7,570.5,12.0,"helvetica-bold","S"],[114.8,569.8,12.0,"helvetica-bold","/"],[132.7,570.5,12.0,"helvetica-bold","P"],[173.6,570.5,12.0,"helvetica-bold","D"],[214.2,570.5,12.0,"helvetica-bold","M"],[259.3,570.5,12.0,"helvetica-bold","J"],[312.2,569.8,15.0,"arrow",""],[335.8,570.5,12.0,"helvetica-bold","J"],[358.9,569.8,12.0,"helvetica-bold","/"],[373.8,570.5,12.0,"helvetica-bold","L"],[416.5,570.5,12.0,"helvetica-bold","F"],[460.8,570.5,12.0,"helvetica-bold","U"],[504.7,570.5,12.0,"helvetica-bold","V"],[89.5,587.6,7.5,"helvetica-normal","DINGHIES"],[89.5,601.8,7.5,"helvetica-normal","NUMBER"],[130.8,601.8,7.5,"helvetica-normal","CAPACITY"],[181.8,601.8,7.5,"helvetica-normal","COVER"],[264.2,601.8,7.5,"helvetica-normal","COLOUR"],[40.8,611.1,15.0,"arrow",""],[59.6,611.8,12.0,"helvetica-bold","D"],[80.3,611.0,12.0,"helvetica-bold","/"],[168.2,611.1,15.0,"arrow",""],[190.8,611.8,12.0,"helvetica-bold","C"],[205.8,611.1,15.0,"arrow",""],[367.9,611.0,12.0,"helvetica-bold","<<"],[381.9,614.9,7.5,"menu",""],[89.5,628.1,7.5,"helvetica-normal","AIRCRAFT"],[128.9,628.1,7.5,"helvetica-normal","COLOUR"],[162.7,628.1,7.5,"helvetica-normal","AND"],[180.6,628.1,7.5,"helvetica-normal","MARKINGS"],[60.8,637.3,12.0,"helvetica-bold","A"],[80.3,637.3,12.0,"helvetica-bold","/"],[89.5,654.3,7.5,"helvetica-normal","REMARKS"],[40.8,662.8,15.0,"arrow",""],[59.6,664.3,12.0,"helvetica-bold","N"],[78.4,663.9,12.0,"courier-bold","/"],[527.4,663.9,12.0,"courier-bold","<<"],[541.8,666.6,7.5,"menu",""],[89.5,680.6,7.5,"helvetica-normal","PILOT-IN-COMMAND"],[61.5,690.1,12.0,"courier-bold","C"],[78.4,690.1,12.0,"courier-bold","/"],[348.4,690.1,12.0,"courier-bold",")<<"],[370.8,692.9,7.5,"menu",""],[82.0,709.8,7.5,"helvetica-normal","FILED"],[105.3,709.8,7.5,"helvetica-normal","BY"],[232.0,709.8,7.5,"helvetica-normal","ADDITIONAL"],[278.8,709.8,7.5,"helvetica-normal","REQUIREMENTS"]]};
+function drawIcaoForm(doc, S, d){
+  const K=[0,0,0];
+  const base=(fam,s)=>fam.startsWith('courier')?0.70*s:0.79*s;
+  // rects
+  S.r.forEach(([x,y,w,h,k])=>{
+    if(k==='s'){doc.setDrawColor(0);doc.setLineWidth(0.75);doc.rect(x,y,w,h,'S')}
+    else{const c=k==='g'?230:(k==='w'?255:0);doc.setFillColor(c,c,c);doc.rect(x,y,w,h,'F')}
+  });
+  // static labels & symbols
+  doc.setTextColor(0);
+  S.w.forEach(([x,y,s,f,t])=>{
+    if(f==='menu'){doc.setLineWidth(0.6);[2.6,4.3,6.0].forEach(o=>doc.line(x+0.4,y+o,x+5.6,y+o));return}
+    if(f==='arrow'){const m=y+7.6,w=11.5;doc.setLineWidth(0.7);doc.line(x+1,m-1.6,x+w-2.5,m-1.6);doc.line(x+1,m+1.6,x+w-2.5,m+1.6);doc.line(x+w-5.5,m-4.5,x+w,m);doc.line(x+w-5.5,m+4.5,x+w,m);return}
+    if(f==='dash'){const w=s*0.6,m=y+s*0.42;doc.setLineWidth(0.9);doc.line(x,m,x+w,m);return}
+    const [fam,st]=f.split('-');doc.setFont(fam,st);doc.setFontSize(s);doc.text(t,x,y+base(fam,s));
+  });
+  // value helpers
+  const V=(t,x,top,s=12)=>{if(!t)return;doc.setFont('courier','bold');doc.setFontSize(s);doc.text(String(t),x,top+0.70*s)};
+  const cells=(t,x,w,n,top,s=12)=>{t=(t||'').slice(0,n);const cw=w/n;doc.setFont('courier','bold');doc.setFontSize(s);for(let i=0;i<t.length;i++){doc.text(t[i],x+i*cw+cw/2,top+0.70*s,{align:'center'})}};
+  const wrap=(text,caps)=>{const out=[];let cur='',i=0;(text||'').split(' ').filter(Boolean).forEach(wd=>{const cap=caps[Math.min(i,caps.length-1)];if(!cur)cur=wd;else if((cur+' '+wd).length<=cap)cur+=' '+wd;else{out.push(cur);i++;cur=wd}});if(cur)out.push(cur);return out};
+  const cross=(x,y,sz=16.5)=>{doc.setDrawColor(0);doc.setLineWidth(1.5);doc.line(x+1.8,y+1.8,x+sz-1.8,y+sz-1.8);doc.line(x+sz-1.8,y+1.8,x+1.8,y+sz-1.8)};
+
+  // addressees
+  const al=wrap(d.addr,[57,57,52]);[[136.8,93.9],[136.8,109.6],[136.8,124.6]].forEach((p,i)=>V(al[i],p[0],p[1]));
+  cells((d.filing||'').slice(0,2),48.6,34.2,2,154.9,11);cells((d.filing||'').slice(2),82.8,51.3,4,154.9,11);
+  cells(d.orig,146.9,115.5,8,154.9,11);
+  cells(d.acid,190.8,105,7,215.4);
+  cells(d.rules,408.2,16.5,1,215.4);
+  cells(d.tof,505.8,16.5,1,215.4);
+  cells(d.number,59.5,30,2,249.1);
+  cells(d.type,153.2,63.8,4,249.1);
+  cells(d.wtc,277,16.5,1,249.1);
+  V(d.equip,384.2,249.1);
+  cells(d.dep,97,60,4,276.5,13.5);
+  cells(d.eobt,235.8,60,4,276.5,13.5);
+  cells(d.spd,59.5,67.5,5,305.4);
+  cells(d.lvl,142,75,5,305.4);
+  const rl=wrap(d.route,[43,71,71,71,66]);
+  [[238,304.6],[39.5,319.6],[39.5,334.6],[39.5,349.6],[39.5,364.6]].forEach((p,i)=>V(rl[i],p[0],p[1]));
+  cells(d.dest,97,60,4,402.9);
+  cells(d.eet,236.5,52.5,4,402.9);
+  cells(d.altn,352.8,60,4,402.9);
+  cells(d.altn2,465.2,60,4,402.9);
+  const ol=wrap(d.f18,[67,71,71,66]);
+  [[61.8,433.6],[39.5,448.6],[39.5,463.6],[39.5,478.6]].forEach((p,i)=>V(ol[i],p[0],p[1]));
+  cells(d.endur,89.5,52.5,4,531.9);
+  cells(d.pob,217,45,3,531.9);
+  // emergency radio / survival / jackets: cross what is NOT carried
+  if(!d.radio.U)cross(412,529);if(!d.radio.V)cross(457,529);if(!d.radio.E)cross(500.5,529);
+  if(!d.surv.any){cross(89.5,568)}
+  if(!d.surv.P)cross(128.5,568);if(!d.surv.D)cross(169.8,568);if(!d.surv.M)cross(211,568);if(!d.surv.J)cross(254.5,568);
+  if(!d.jack.any){cross(331,568)}
+  if(!d.jack.L)cross(369.2,568);if(!d.jack.F)cross(412,568);if(!d.jack.U)cross(457,568);if(!d.jack.V)cross(500.5,568);
+  // dinghies (none carried)
+  cross(55.8,609.2);cross(187,609.2);
+  V(d.colour,91.8,637.6);
+  if(d.remarks)V(d.remarks.slice(0,59),91.8,664.3);else cross(55.8,661.8);
+  V((d.pic||'').slice(0,35),91.8,690.1);
+  // FILED BY box: FD/ name, LIC No./ number, signature below
+  const fit=(t,maxW,sz)=>{doc.setFont('helvetica','bold');doc.setFontSize(sz);while(sz>7&&doc.getTextWidth(t)>maxW){sz-=0.5;doc.setFontSize(sz)}return sz};
+  const l1='FD/ '+(d.fd||''),l2='LIC N\u00BA./ '+(d.licence||'');
+  fit(l1,146,11.5);doc.text(l1,41,731.5);
+  fit(l2,146,11.5);doc.text(l2,41,743.5);
+  if(d.sig){const box={x:41,y:745,w:146,h:22};let h=box.h,w=h*d.sigAR;if(w>box.w){w=box.w;h=w/d.sigAR}doc.addImage(d.sig,'PNG',box.x+(box.w-w)/2,box.y,w,h)}
+}
+
+function trimSig(){const w=cv.width,h=cv.height,px=cx.getImageData(0,0,w,h).data;let x0=w,y0=h,x1=0,y1=0;
+  for(let y=0;y<h;y++)for(let x=0;x<w;x++){if(px[(y*w+x)*4+3]>20){if(x<x0)x0=x;if(x>x1)x1=x;if(y<y0)y0=y;if(y>y1)y1=y}}
+  if(x1<=x0||y1<=y0)return{url:cv.toDataURL('image/png'),ar:w/h};const m=6;x0=Math.max(0,x0-m);y0=Math.max(0,y0-m);x1=Math.min(w-1,x1+m);y1=Math.min(h-1,y1+m);
+  const c=document.createElement('canvas');c.width=x1-x0+1;c.height=y1-y0+1;c.getContext('2d').drawImage(cv,x0,y0,c.width,c.height,0,0,c.width,c.height);return{url:c.toDataURL('image/png'),ar:c.width/c.height}}
+function makePdf(b){
+  const {jsPDF}=window.jspdf;const d=new jsPDF({unit:'pt',format:[594.96,841.92]});const v=b.v;
+  const now=new Date();const ft=pad(now.getUTCDate(),2)+pad(now.getUTCHours(),2)+pad(now.getUTCMinutes(),2);
+  let sig=null,ar=4;if(sigUsed){const t=trimSig();sig=t.url;ar=t.ar}
+  drawIcaoForm(d,FORM,{addr:v.addr,filing:ft,orig:v.orig,acid:v.acid,rules:v.rules,tof:v.tof,number:'',type:v.type,wtc:v.wtc,
+    equip:v.equip.replace(/\s*\/\s*/,' / '),dep:v.dep,eobt:v.eobt,spd:'N'+pad(v.spd,4),lvl:'F'+v.lvl,route:v.route,dest:v.dest,eet:v.eet,altn:v.altn,altn2:v.altn2,
+    f18:b.f18,endur:v.endur,pob:v.pob==='TBN'?'TBN':pad(v.pob,3),radio:v.radio,surv:v.surv,jack:v.jack,colour:v.colour,remarks:v.remarks,pic:v.pic,fd:v.dname,licence:v.lic,sig:sig,sigAR:ar});
+  return d;
+}
+async function getDownloads(){try{return window.claude&&window.claude.use?await window.claude.use('downloads'):null}catch(e){return null}}
+function askConfirm(html,yes,no){return new Promise(res=>{$('cfmM').innerHTML=html;$('cfmYes').textContent=yes;$('cfmNo').textContent=no;const m=$('cfm');m.hidden=false;$('cfmNo').focus();
+  const done=v=>{m.hidden=true;res(v)};$('cfmYes').onclick=()=>done(true);$('cfmNo').onclick=()=>done(false)})}
+async function askMissing(b){const miss=[];if(!b.v.dname)miss.push('اسم المُرحِّل');if(!b.v.lic)miss.push('رقم الرخصة');if(!sigUsed)miss.push('التوقيع');
+  const uc=finalAddrs().filter(x=>!x.ok).map(x=>x.a);
+  if(!miss.length&&!uc.length)return true;
+  let h='';if(miss.length)h+='<p>هل أنت متأكد أنك لا تريد '+(miss.length>1?miss.slice(0,-1).join('، ')+' و'+miss[miss.length-1]:miss[0])+'؟</p>';
+  if(uc.length)h+='<p>هذه العناوين غير مؤكدة:</p><ul>'+uc.map(a=>'<li>'+a+'</li>').join('')+'</ul>';
+  const ok=await askConfirm(h,'متابعة','رجوع وتعديل');
+  if(!ok){(miss.length?(!b.v.dname?$('dname'):!b.v.lic?$('lic'):$('pad')):$('chips')).scrollIntoView({behavior:'smooth',block:'center'})}
+  return ok}
+async function preparePdf(){
+  const b=build();if(b.errs.length){toast('صحّح الأخطاء أولاً');$('errs').scrollIntoView({behavior:'smooth',block:'center'});return null}
+  if(!(await askMissing(b)))return null;
+  if(!window.jspdf){toast('مكتبة PDF لم تُحمّل، تحقق من الاتصال');return null}
+  const doc=makePdf(b);const name='FPL_'+b.v.acid+'_'+b.v.dep+'-'+b.v.dest+'_'+b.dof+'.pdf';return {b,name,blob:doc.output('blob')};
+}
+async function capPerm(name){try{const pm=window.claude&&window.claude.use?await window.claude.use('permissions'):null;return pm?{pm,st:await pm.state(name)}:{pm:null,st:'unavailable'}}catch(e){return{pm:null,st:'unavailable'}}}
+async function viaDownloads(f){const dl=await getDownloads();if(!dl)return 'none';
+  try{await dl.save({filename:f.name,data:f.blob});toast('تم');return 'ok'}catch(e){const c=e&&e.code;if(c==='declined'){toast('تم الإلغاء');return 'ok'}return c==='not_granted'||c==='unavailable'||c==='capability_disabled'?'none':'err'}}
+async function viaShare(f){try{const file=new File([f.blob],f.name,{type:'application/pdf'});
+  if(navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({files:[file]});return 'ok'}}catch(e){if(e&&e.name==='AbortError')return 'ok'}return 'none'}
+function viaLink(f){try{const u=URL.createObjectURL(f.blob);const a=document.createElement('a');a.href=u;a.download=f.name;a.target='_blank';a.rel='noopener';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),60000);return 'ok'}catch(e){return 'none'}}
+async function blocked(){const {pm,st}=await capPerm('downloads');
+  if(st==='denied'&&pm){if(await askConfirm('<p>حفظ الملفات مرفوض لهذه الصفحة على هذا الجهاز.</p><p>افتح الصلاحيات وفعّل <b>Downloads</b> ثم أعد المحاولة.</p>','فتح الصلاحيات','إغلاق')){try{await pm.manage()}catch(e){toast('افتح قائمة Permissions في أعلى الصفحة')}}return}
+  await askConfirm('<p>هذا العرض لا يسمح بحفظ أو مشاركة الملف.</p><p>افتح الرابط من <b>تطبيق Claude</b> بدل المتصفح، ووافق على طلب الحفظ عندما يظهر.</p>','حسناً','إغلاق')}
+$('pdfBtn').onclick=async()=>{const f=await preparePdf();if(!f)return;
+  for(const m of [viaDownloads,viaShare]){const r=await m(f);if(r==='ok')return}
+  if(viaLink(f)==='ok'&&!(window.self!==window.top))return;
+  blocked()};
+$('waBtn').onclick=async()=>{const f=await preparePdf();if(!f)return;
+  if(await viaShare(f)==='ok')return;
+  toast('اختر واتساب من قائمة المشاركة');
+  if(await viaDownloads(f)==='ok')return;
+  if(viaLink(f)==='ok'&&!(window.self!==window.top))return;
+  blocked()};
+$('waTxtBtn').onclick=()=>{const b=build();if(b.errs.length){toast('صحّح الأخطاء أولاً');return}const t='FF '+b.v.addr+'\n'+b.msg+'\nPIC: '+b.v.pic+(b.v.dname?'\nFD/ '+b.v.dname:'')+(b.v.lic?'\nLIC No./ '+b.v.lic:'');window.open('https://wa.me/?text='+encodeURIComponent(t),'_blank')};
+$('copyBtn').onclick=async()=>{const b=build();try{await navigator.clipboard.writeText('FF '+b.v.addr+'\n'+b.msg);toast('تم النسخ')}catch(e){toast('النسخ غير متاح، انسخ من المربع يدوياً')}};
+refresh();
+</script>
+</body>
+</html>
